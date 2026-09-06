@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>lava</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --coral: #ff7a68;
+    --coral-deep: #e2434a;
+    --red: #ef2f3d;
+    --red-deep: #c81f2d;
+    --orange: #ff8e2b;
+    --orange-deep: #ff6b1a;
+    --yellow: #ffd23f;
+    --yellow-soft: #ffdf70;
+    --cream: #fff1e6;
+    --ink: #5c1616;
+    --sidebar: #e8564f;
+    --sidebar-deep: #7a2129;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    height:100%;
+    font-family:'Quicksand', sans-serif;
+    overflow:hidden;
+  }
+
+  body{
+    display:flex;
+    background:var(--red);
+    color:var(--cream);
+  }
+
+  .sidebar{
+    position:relative;
+    width:92px;
+    flex-shrink:0;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:22px 0 18px;
+    background:linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-deep) 100%);
+    box-shadow: 6px 0 24px rgba(60,10,14,0.35);
+    z-index:20;
+  }
+
+  .nav-list{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    width:100%;
+    align-items:center;
+    margin-top:6px;
+  }
+
+  .nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:5px;
+    width:64px;
+    padding:8px 4px 7px;
+    border-radius:16px;
+    color:rgba(255,255,255,0.85);
+    text-decoration:none;
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:.2px;
+    transition: background .18s ease, color .18s ease, transform .18s ease;
+    cursor:pointer;
+    background:transparent;
+    border:none;
+  }
+
+  .nav-item svg{ width:20px; height:20px; transition: transform .18s ease; }
+  .nav-item:hover{ background:rgba(255,255,255,0.14); color:#fff; transform: translateY(-1px); }
+  .nav-item.active{
+    background:rgba(255,255,255,0.22);
+    color:#fff;
+    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.25);
+  }
+
+  .brand-tag{
+    margin-top:auto;
+    font-family:'Fredoka', sans-serif;
+    font-size:13px;
+    font-weight:500;
+    color:rgba(255,255,255,0.55);
+    letter-spacing:.3px;
+  }
+
+  .stage{
+    position:relative;
+    flex:1;
+    height:100vh;
+    overflow:hidden;
+    background: linear-gradient(180deg, var(--coral) 0%, var(--coral) 30%, var(--red) 68%, var(--red-deep) 100%);
+  }
+
+  .blob-layer{ position:absolute; inset:0; overflow:hidden; }
+  .blob{ position:absolute; will-change: transform; }
+  .blob svg{ display:block; width:100%; height:100%; }
+
+  .b-yellow{ top:-8%; right:-18%; width:75%; height:60%; animation: driftYellow 26s ease-in-out infinite; filter: drop-shadow(0 10px 30px rgba(120,50,0,0.15)); }
+  .b-orange{ bottom:8%; left:-20%; width:70%; height:55%; animation: driftOrange 22s ease-in-out infinite; }
+  .b-shadow{ top:-15%; right:-15%; width:55%; height:45%; opacity:.35; animation: driftShadow 30s ease-in-out infinite; }
+  .b-floor{ bottom:-25%; left:-10%; width:120%; height:55%; animation: driftFloor 34s ease-in-out infinite; }
+
+  @keyframes driftYellow{ 0%,100%{ transform: translate(0,0) scale(1) rotate(0deg); } 50%{ transform: translate(-2.5%, 2%) scale(1.03) rotate(1.2deg); } }
+  @keyframes driftOrange{ 0%,100%{ transform: translate(0,0) scale(1) rotate(0deg); } 50%{ transform: translate(3%, -2%) scale(1.04) rotate(-1.4deg); } }
+  @keyframes driftShadow{ 0%,100%{ transform: translate(0,0) scale(1); } 50%{ transform: translate(-2%, 2%) scale(1.06); } }
+  @keyframes driftFloor{ 0%,100%{ transform: translateX(0) scaleY(1); } 50%{ transform: translateX(1.5%) scaleY(1.04); } }
+
+  .grain{
+    position:absolute; inset:0;
+    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 3px 3px;
+    opacity:.4;
+    pointer-events:none;
+  }
+
+  .content{
+    position:relative; z-index:10; height:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:0 24px; text-align:center;
+  }
+
+  .logo-wrap{ display:flex; align-items:baseline; gap:10px; margin-bottom:34px; animation: riseIn .8s cubic-bezier(.2,.8,.25,1) both; }
+  .logo{ font-family:'Fredoka', sans-serif; font-size:96px; font-weight:600; color:#fff; letter-spacing:-2px; text-shadow: 0 8px 26px rgba(90,10,10,0.35); line-height:1; user-select:none; }
+  .logo-beta{ font-family:'Quicksand', sans-serif; font-size:18px; font-weight:700; color:rgba(255,255,255,0.75); background:rgba(255,255,255,0.16); padding:4px 12px; border-radius:999px; transform: translateY(-8px); }
+
+  @keyframes riseIn{ from{ opacity:0; transform: translateY(14px); } to{ opacity:1; transform: translateY(0); } }
+
+  .search-form{ width:min(640px, 84vw); animation: riseIn .8s .08s cubic-bezier(.2,.8,.25,1) both; }
+  .search-box{
+    position:relative; display:flex; align-items:center;
+    background:rgba(255,255,255,0.16); backdrop-filter: blur(6px);
+    border:1.5px solid rgba(255,255,255,0.3); border-radius:20px;
+    padding:6px 8px 6px 22px; box-shadow: 0 14px 34px rgba(80,10,15,0.28), inset 0 1px 0 rgba(255,255,255,0.25);
+    transition: box-shadow .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .search-box:focus-within{ background:rgba(255,255,255,0.24); border-color:rgba(255,255,255,0.55); box-shadow: 0 16px 40px rgba(80,10,15,0.34), 0 0 0 4px rgba(255,255,255,0.12); }
+  .search-icon{ width:20px; height:20px; flex-shrink:0; color: rgba(255,255,255,0.75); }
+  .search-input{ flex:1; border:none; outline:none; background:transparent; color:#fff; font-family:'Quicksand', sans-serif; font-weight:600; font-size:18px; padding:12px 12px; }
+  .search-input::placeholder{ color:rgba(255,255,255,0.65); font-weight:600; }
+  .search-submit{ flex-shrink:0; display:flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:14px; border:none; background:rgba(255,255,255,0.22); color:#fff; cursor:pointer; transition: background .18s ease, transform .18s ease; }
+  .search-submit:hover{ background:rgba(255,255,255,0.34); transform: translateX(1px); }
+  .search-submit svg{ width:19px; height:19px; }
+
+  .panel{
+    position:absolute; inset:14px; z-index:30; display:flex; flex-direction:column;
+    background:var(--cream); border-radius:24px; box-shadow: 0 24px 60px rgba(50,5,10,0.45);
+    overflow:hidden; opacity:0; transform: scale(.97) translateY(8px); pointer-events:none;
+    transition: opacity .22s cubic-bezier(.2,.8,.25,1), transform .22s cubic-bezier(.2,.8,.25,1);
+  }
+  .panel.open{ opacity:1; transform: scale(1) translateY(0); pointer-events:auto; }
+
+  .browser-topbar{ display:flex; align-items:center; gap:8px; padding:12px 14px; background:linear-gradient(180deg, #ffe2d6, #ffd6c4); border-bottom:1px solid rgba(90,20,20,0.08); flex-shrink:0; }
+  .browser-btn{ display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:12px; border:none; background:rgba(90,20,20,0.06); color:var(--ink); cursor:pointer; flex-shrink:0; transition: background .15s ease, opacity .15s ease; }
+  .browser-btn:hover{ background:rgba(90,20,20,0.12); }
+
+  .browser-close{ background: rgba(90,20,20,0.08); margin-left: auto; }
+  .browser-body{ position:relative; flex:1; background:#fff; }
+  .browser-body iframe{ width:100%; height:100%; border:none; display:block; }
+
+  .games-topbar{ display:flex; align-items:center; gap:10px; padding:14px 16px; background:linear-gradient(180deg, #ffe2d6, #ffd6c4); border-bottom:1px solid rgba(90,20,20,0.08); flex-shrink:0; }
+  .games-search{ flex:1; display:flex; align-items:center; gap:8px; background:#fff; border-radius:12px; padding:0 14px; border:1.5px solid rgba(90,20,20,0.08); }
+  .games-search:focus-within{ border-color: var(--red); }
+  .games-search svg{ width:15px; height:15px; color:rgba(92,22,22,0.4); flex-shrink:0; }
+  .games-search input{ flex:1; border:none; outline:none; background:transparent; padding:9px 4px; font-family:'Quicksand', sans-serif; font-weight:600; font-size:14.5px; color:var(--ink); }
+
+  .games-add-btn{ display:flex; align-items:center; gap:7px; padding:0 16px; height:38px; border-radius:12px; border:none; background: var(--red); color:#fff; font-family:'Quicksand', sans-serif; font-weight:700; font-size:13.5px; cursor:pointer; flex-shrink:0; transition: background .15s ease, transform .15s ease; }
+  .games-add-btn:hover{ background: var(--red-deep); transform: translateY(-1px); }
+  .games-add-btn svg{ width:16px; height:16px; }
+
+  .games-body{ position:relative; flex:1; overflow-y:auto; background:#fff; }
+  .games-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:16px; padding:20px; }
+
+  .game-card{ position:relative; display:flex; flex-direction:column; border-radius:16px; overflow:hidden; background: var(--cream); border:1px solid rgba(90,20,20,0.08); cursor:pointer; text-align:left; transition: transform .15s ease, box-shadow .15s ease; }
+  .game-card:hover{ transform: translateY(-3px); box-shadow: 0 10px 22px rgba(90,20,20,0.16); }
+
+  .game-thumb{ width:100%; aspect-ratio: 4/3; display:flex; align-items:center; justify-content:center; font-family:'Fredoka', sans-serif; font-size:26px; color:#fff; background: linear-gradient(135deg, var(--orange), var(--red)); background-size:cover; background-position:center; }
+  .game-info{ padding:10px 12px 12px; }
+  .game-title{ font-family:'Quicksand', sans-serif; font-weight:700; font-size:14px; color: var(--ink); margin:0 0 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .game-tag{ font-size:11.5px; font-weight:600; color: rgba(92,22,22,0.5); min-height: 14px; }
+
+  .card-actions{ position:absolute; top:8px; right:8px; display:flex; gap:10px; opacity:0; transition: opacity .15s ease; }
+  .game-card:hover .card-actions{ opacity:1; }
+
+  .card-btn{ width:20px; height:20px; border-radius:99px; border:none; background: rgba(20,10,10,0.65); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; transition: background .15s ease; }
+  .card-btn:hover{ background: rgba(20,10,10,0.9); }
+  .card-btn svg{ width:10px; height:10px; }
+
+  .games-empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:60px 30px; color: rgba(92,22,22,0.45); font-weight:600; font-size:14px; text-align:center; }
+  .games-empty svg{ width:34px; height:34px; opacity:.5; }
+
+  .games-menu-loading{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px; padding:80px 30px; color: var(--ink);
+    font-family:'Fredoka', sans-serif; font-size:18px; font-weight:500;
+  }
+
+  .game-player{ position:absolute; inset:0; display:none; flex-direction:column; background:#fff; z-index:35; }
+  .game-player.open{ display:flex; }
+
+  .player-topbar{ display:flex; align-items:center; gap:10px; padding:12px 14px; background:linear-gradient(180deg, #ffe2d6, #ffd6c4); border-bottom:1px solid rgba(90,20,20,0.08); flex-shrink:0; }
+  .player-title{ flex:1; font-family:'Quicksand', sans-serif; font-weight:700; font-size:14.5px; color: var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .player-body{ position:relative; flex:1; background:#fff; }
+  .player-body iframe{ width:100%; height:100%; border:none; display:block; }
+
+  .player-loading{
+    position:absolute; inset:0;
+    background: var(--cream);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:18px; z-index:40;
+    opacity:1; transition: opacity .3s ease;
+  }
+  .player-loading.hidden{ opacity:0; pointer-events:none; }
+
+  .spinner{
+    width:44px; height:44px;
+    border:4px solid rgba(92,22,22,0.12);
+    border-top-color: var(--red);
+    border-radius:50%;
+    animation: spin 0.75s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text{
+    font-family:'Fredoka', sans-serif;
+    font-size:20px; font-weight:600;
+    color: var(--ink); letter-spacing:.3px;
+  }
+
+  .modal-overlay{ position:absolute; inset:0; z-index:50; display:none; align-items:center; justify-content:center; background: rgba(30,10,10,0.4); padding:20px; }
+  .modal-overlay.open{ display:flex; }
+
+  .modal-card{ width:min(440px, 100%); max-height:90vh; overflow-y:auto; background:#fff; border-radius:20px; padding:22px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+  .modal-card h2{ margin:0 0 16px; font-family:'Fredoka', sans-serif; font-size:22px; font-weight:600; color: var(--ink); }
+  .modal-field{ margin-bottom:12px; }
+  .modal-field label{ display:block; font-size:12.5px; font-weight:700; color: rgba(92,22,22,0.6); margin-bottom:5px; }
+  .modal-field input[type="text"]{ width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid rgba(90,20,20,0.15); font-family:'Quicksand', sans-serif; font-weight:600; font-size:14px; color: var(--ink); outline:none; }
+  .modal-field input[type="file"]{ width:100%; padding:8px 10px; border-radius:10px; border:1.5px dashed rgba(90,20,20,0.25); background: rgba(90,20,20,0.02); font-family:'Quicksand', sans-serif; font-weight:600; font-size:13px; color: var(--ink); cursor:pointer; }
+  .modal-field input:focus{ border-color: var(--red); }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
+  .modal-btn{ padding:10px 18px; border-radius:11px; border:none; font-family:'Quicksand', sans-serif; font-weight:700; font-size:13.5px; cursor:pointer; }
+  .modal-btn.cancel{ background: rgba(90,20,20,0.08); color: var(--ink); }
+  .modal-btn.save{ background: var(--red); color:#fff; }
+
+  /* ---------- THEMES ---------- */
+  body[data-theme="ocean"]{
+    --coral:#5aa9ff; --coral-deep:#2b6fd1; --red:#1f6fb2; --red-deep:#114a7c;
+    --orange:#3ecfc0; --orange-deep:#16a394; --yellow:#8fe3ff; --yellow-soft:#bff2ff;
+    --cream:#eef8ff; --ink:#123049; --sidebar:#2b6fd1; --sidebar-deep:#123a63;
+  }
+  body[data-theme="midnight"]{
+    --coral:#4a3f6b; --coral-deep:#2c2440; --red:#1c1730; --red-deep:#100c1e;
+    --orange:#7c5cff; --orange-deep:#5a3fd9; --yellow:#9d8bff; --yellow-soft:#c3b6ff;
+    --cream:#f1ecff; --ink:#241b33; --sidebar:#2c2440; --sidebar-deep:#150f22;
+  }
+
+  /* ---------- PERFORMANCE MODE ---------- */
+  body.perf-mode .blob{ animation:none !important; }
+  body.perf-mode .search-box{ backdrop-filter:none !important; }
+  body.perf-mode *{ transition:none !important; }
+  body.perf-mode .grain{ display:none; }
+
+  /* ---------- SETTINGS PANEL ---------- */
+  .settings-topbar{ display:flex; align-items:center; gap:10px; padding:14px 16px; background:linear-gradient(180deg, #ffe2d6, #ffd6c4); border-bottom:1px solid rgba(90,20,20,0.08); flex-shrink:0; }
+  .settings-title{ flex:1; font-family:'Fredoka', sans-serif; font-weight:600; font-size:18px; color: var(--ink); }
+  .settings-body{ flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:14px; background:#fff; }
+
+  .setting-card{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    background: var(--cream); border:1px solid rgba(90,20,20,0.08);
+    border-radius:16px; padding:16px 18px;
+  }
+  .setting-info h3{ font-family:'Quicksand', sans-serif; font-size:14.5px; font-weight:700; color: var(--ink); margin:0 0 3px; }
+  .setting-info p{ font-size:12.5px; color: rgba(92,22,22,0.55); font-weight:600; }
+
+  .setting-select{
+    padding:9px 12px; border-radius:10px; border:1.5px solid rgba(90,20,20,0.15);
+    font-family:'Quicksand', sans-serif; font-weight:700; font-size:13.5px;
+    color: var(--ink); background:#fff; outline:none; cursor:pointer; flex-shrink:0;
+  }
+  .setting-select:focus{ border-color: var(--red); }
+
+  .setting-switch{ position:relative; display:inline-block; width:46px; height:26px; flex-shrink:0; }
+  .setting-switch input{ opacity:0; width:0; height:0; }
+  .setting-slider{
+    position:absolute; cursor:pointer; inset:0; background: rgba(90,20,20,0.18);
+    transition:.2s; border-radius:999px;
+  }
+  .setting-slider::before{
+    content:""; position:absolute; height:20px; width:20px; left:3px; bottom:3px;
+    background:#fff; transition:.2s; border-radius:50%;
+  }
+  .setting-switch input:checked + .setting-slider{ background: var(--red); }
+  .setting-switch input:checked + .setting-slider::before{ transform: translateX(20px); }
+</style>
+</head>
+<body>
+
+  <nav class="sidebar">
+    <div class="nav-list">
+      <button class="nav-item active" id="navHome" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9.5a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1H17.5a1 1 0 0 0 1-1v-9"/></svg>
+        home
+      </button>
+      <button class="nav-item" id="navGames" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="7.5" width="19" height="10" rx="4"/><path d="M8 10.5v4M6 12.5h4"/><circle cx="15.55" cy="11.55" r="0.7"/><circle cx="17.45" cy="13.45" r="0.7"/></svg>
+        games
+      </button>
+      <button class="nav-item" id="navBrowser" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3Z"/></svg>
+        browser
+      </button>
+      <button class="nav-item" id="navSettings" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.4.7a7.5 7.5 0 0 0-2.6-1.5L14 2h-4l-.4 2.4a7.5 7.5 0 0 0-2.6 1.5l-2.4-.7-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.4-.7a7.5 7.5 0 0 0 2.6 1.5L10 22h4l.4-2.4a7.5 7.5 0 0 0 2.6-1.5l2.4.7 2-3.4-2-1.5Z"/></svg>
+        settings
+      </button>
+    </div>
+    <div class="brand-tag">br4y</div>
+  </nav>
+
+  <main class="stage">
+    <div class="blob-layer">
+      <div class="blob b-floor"><svg viewBox="0 0 1000 500" preserveAspectRatio="none"><path fill="var(--red-deep)" d="M0,180 C220,90 340,260 560,190 C760,130 860,240 1000,170 L1000,500 L0,500 Z"/></svg></div>
+      <div class="blob b-shadow"><svg viewBox="0 0 500 400" preserveAspectRatio="none"><path fill="#5c0f16" d="M500,0 L500,260 C380,300 300,200 220,150 C150,100 80,60 0,0 Z"/></svg></div>
+      <div class="blob b-yellow"><svg viewBox="0 0 800 500" preserveAspectRatio="none"><path fill="var(--yellow)" d="M800,0 L800,180 C650,150 600,260 460,270 C330,280 260,190 120,220 C40,238 10,210 0,190 C120,60 260,10 420,40 C580,70 660,-10 800,0 Z"/></svg></div>
+      <div class="blob b-orange"><svg viewBox="0 0 800 480" preserveAspectRatio="none"><path fill="var(--orange)" d="M0,150 C120,80 220,40 340,90 C460,140 470,240 380,300 C280,365 260,420 140,440 C60,452 20,410 0,380 Z"/></svg></div>
+    </div>
+    <div class="grain"></div>
+
+    <div class="content">
+      <div class="logo-wrap">
+        <span class="logo">lava</span>
+        <span class="logo-beta">beta</span>
+      </div>
+
+      <form class="search-form" id="homeSearchForm">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input class="search-input" id="homeSearchInput" type="text" placeholder="type to get started…" autocomplete="off">
+          <button class="search-submit" type="submit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- BROWSER PANEL -->
+    <div class="panel" id="browserPanel">
+      <div class="browser-topbar">
+        <button class="browser-btn browser-close" id="btnCloseBrowser" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="browser-body">
+        <iframe id="browserFrame"></iframe>
+      </div>
+    </div>
+
+    <!-- GAMES PANEL -->
+    <div class="panel" id="gamesPanel">
+      <div class="games-topbar">
+        <div class="games-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="gamesSearchInput" type="text" placeholder="search games…">
+        </div>
+        <button class="games-add-btn" id="btnAddGame" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+          add game
+        </button>
+        <button class="browser-btn browser-close" id="btnCloseGames" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+
+      <div class="games-body">
+        <div class="games-menu-loading" id="gamesMenuLoading" style="display:none;">
+          <div class="spinner"></div>
+          <div>loading games library…</div>
+        </div>
+        <div class="games-grid" id="gamesGrid"></div>
+        <div class="games-empty" id="gamesEmpty" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="7.5" width="19" height="10" rx="4"/><path d="M8 10.5v4M6 12.5h4"/><circle cx="15.55" cy="11.55" r="0.7"/><circle cx="17.45" cy="13.45" r="0.7"/></svg>
+          <span id="gamesEmptyText">no games yet — add one to get started</span>
+        </div>
+      </div>
+
+      <div class="game-player" id="gamePlayer">
+        <div class="player-topbar">
+          <button class="browser-btn" id="btnPlayerBack" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <div class="player-title" id="playerTitle"></div>
+        </div>
+        <div class="player-body">
+          <div class="player-loading" id="playerLoading">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loadingText">loading game…</div>
+          </div>
+          <iframe id="gameFrame" allow="fullscreen; gamepad; autoplay"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS PANEL -->
+    <div class="panel" id="settingsPanel">
+      <div class="settings-topbar">
+        <div class="settings-title">settings</div>
+        <button class="browser-btn browser-close" id="btnCloseSettings" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="settings-body">
+        <div class="setting-card">
+          <div class="setting-info">
+            <h3>theme</h3>
+            <p>switch the color palette</p>
+          </div>
+          <select class="setting-select" id="settingTheme">
+            <option value="lava">lava (default)</option>
+            <option value="ocean">ocean</option>
+            <option value="midnight">midnight</option>
+          </select>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-info">
+            <h3>performance mode</h3>
+            <p>turns off the animated background and transitions for speed</p>
+          </div>
+          <label class="setting-switch">
+            <input type="checkbox" id="settingPerf">
+            <span class="setting-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-info">
+            <h3>game launch behavior</h3>
+            <p>choose how games open when you click one</p>
+          </div>
+          <select class="setting-select" id="settingLaunch">
+            <option value="panel">open in the games panel</option>
+            <option value="newtab">open in a new tab</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD GAME MODAL -->
+    <div class="modal-overlay" id="addGameModal">
+      <form class="modal-card" id="addGameForm">
+        <h2>add a game</h2>
+        <div class="modal-field">
+          <label for="gameTitleInput">title</label>
+          <input id="gameTitleInput" type="text" placeholder="e.g. Flappy Bird" required>
+        </div>
+        <div class="modal-field">
+          <label for="gameThumbInput">image address url (optional)</label>
+          <input id="gameThumbInput" type="text" placeholder="https://example.com/image.png">
+        </div>
+        <div class="modal-field">
+          <label for="gameFolderInput">select game folder (contains index.html)</label>
+          <input id="gameFolderInput" type="file" webkitdirectory directory multiple>
+        </div>
+        <div class="modal-field">
+          <label for="gameFileInput">or select game files / HTML / ZIP archive</label>
+          <input id="gameFileInput" type="file" accept=".html,.htm,.zip,.js,.css" multiple>
+        </div>
+        <div class="modal-field">
+          <label for="gameTagInput">tag (optional)</label>
+          <input id="gameTagInput" type="text" placeholder="offline">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn cancel" id="btnCancelAddGame">cancel</button>
+          <button type="submit" class="modal-btn save" id="btnSaveGame">upload to server</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- EDIT GAME MODAL -->
+    <div class="modal-overlay" id="editGameModal">
+      <form class="modal-card" id="editGameForm">
+        <h2>edit game</h2>
+        <input type="hidden" id="editGameId">
+        <div class="modal-field">
+          <label for="editTitleInput">title</label>
+          <input id="editTitleInput" type="text" required>
+        </div>
+        <div class="modal-field">
+          <label for="editThumbInput">image address url</label>
+          <input id="editThumbInput" type="text" placeholder="https://example.com/image.png">
+        </div>
+        <div class="modal-field">
+          <label for="editThumbFileInput">or upload thumbnail file from computer</label>
+          <input id="editThumbFileInput" type="file" accept="image/*">
+        </div>
+        <div class="modal-field">
+          <label for="editFolderInput">replace game folder (optional)</label>
+          <input id="editFolderInput" type="file" webkitdirectory directory multiple>
+        </div>
+        <div class="modal-field">
+          <label for="editFileInput">or replace game files / HTML / ZIP (optional)</label>
+          <input id="editFileInput" type="file" accept=".html,.htm,.zip,.js,.css" multiple>
+        </div>
+        <div class="modal-field">
+          <label for="editTagInput">tag</label>
+          <input id="editTagInput" type="text">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn cancel" id="btnCancelEditGame">cancel</button>
+          <button type="submit" class="modal-btn save" id="btnSaveEditGame">save changes</button>
+        </div>
+      </form>
+    </div>
+
+  </main>
+
+<script>
+(function(){
+  const navHome = document.getElementById('navHome');
+  const navGames = document.getElementById('navGames');
+  const navBrowser = document.getElementById('navBrowser');
+  const navSettings = document.getElementById('navSettings');
+
+  const settingsPanel = document.getElementById('settingsPanel');
+  const btnCloseSettings = document.getElementById('btnCloseSettings');
+  const settingTheme = document.getElementById('settingTheme');
+  const settingPerf = document.getElementById('settingPerf');
+  const settingLaunch = document.getElementById('settingLaunch');
+
+  const browserPanel = document.getElementById('browserPanel');
+  const browserFrame = document.getElementById('browserFrame');
+  const btnCloseBrowser = document.getElementById('btnCloseBrowser');
+  const homeSearchForm = document.getElementById('homeSearchForm');
+  const homeSearchInput = document.getElementById('homeSearchInput');
+
+  const gamesPanel = document.getElementById('gamesPanel');
+  const gamesGrid = document.getElementById('gamesGrid');
+  const gamesEmpty = document.getElementById('gamesEmpty');
+  const gamesEmptyText = document.getElementById('gamesEmptyText');
+  const gamesSearch = document.getElementById('gamesSearchInput');
+  const gamesMenuLoading = document.getElementById('gamesMenuLoading');
+
+  const addGameModal = document.getElementById('addGameModal');
+  const editGameModal = document.getElementById('editGameModal');
+
+  const gamePlayer = document.getElementById('gamePlayer');
+  const gameFrame = document.getElementById('gameFrame');
+  const playerTitle = document.getElementById('playerTitle');
+  const playerLoading = document.getElementById('playerLoading');
+  const loadingText = document.getElementById('loadingText');
+
+  let activeGames = [];
+
+  function setActiveNav(which){
+    [navHome, navGames, navBrowser, navSettings].forEach(b => b.classList.remove('active'));
+    if(which === 'home') navHome.classList.add('active');
+    if(which === 'games') navGames.classList.add('active');
+    if(which === 'browser') navBrowser.classList.add('active');
+    if(which === 'settings') navSettings.classList.add('active');
+  }
+
+  function closeAllPanels(){
+    browserPanel.classList.remove('open');
+    gamesPanel.classList.remove('open');
+    settingsPanel.classList.remove('open');
+  }
+
+  navHome.addEventListener('click', () => { closeAllPanels(); setActiveNav('home'); });
+  
+  navGames.addEventListener('click', () => { 
+    closeAllPanels(); 
+    gamesPanel.classList.add('open'); 
+    setActiveNav('games'); 
+    loadGames(); 
+  });
+  
+  document.getElementById('btnCloseGames').addEventListener('click', () => { 
+    gamesPanel.classList.remove('open'); 
+    setActiveNav('home'); 
+  });
+
+  // ---------- SETTINGS ----------
+  const SETTINGS_KEY = 'lava_settings_v1';
+  const DEFAULT_SETTINGS = { theme: 'lava', perf: false, launch: 'panel' };
+
+  function loadSettingsFromStorage(){
+    try{
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if(!raw) return { ...DEFAULT_SETTINGS };
+      return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    }catch(e){
+      return { ...DEFAULT_SETTINGS };
+    }
+  }
+
+  function saveSettingsToStorage(s){
+    try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+    catch(e){ /* storage unavailable */ }
+  }
+
+  let settings = loadSettingsFromStorage();
+
+  function applySettings(){
+    if(settings.theme === 'lava'){
+      document.body.removeAttribute('data-theme');
+    } else {
+      document.body.setAttribute('data-theme', settings.theme);
+    }
+    document.body.classList.toggle('perf-mode', !!settings.perf);
+  }
+
+  function applyControlsToUI(){
+    settingTheme.value = settings.theme;
+    settingPerf.checked = !!settings.perf;
+    settingLaunch.value = settings.launch;
+  }
+
+  applySettings();
+  applyControlsToUI();
+
+  navSettings.addEventListener('click', () => {
+    closeAllPanels();
+    settingsPanel.classList.add('open');
+    setActiveNav('settings');
+  });
+
+  btnCloseSettings.addEventListener('click', () => {
+    settingsPanel.classList.remove('open');
+    setActiveNav('home');
+  });
+
+  settingTheme.addEventListener('change', () => {
+    settings.theme = settingTheme.value;
+    applySettings();
+    saveSettingsToStorage(settings);
+  });
+
+  settingPerf.addEventListener('change', () => {
+    settings.perf = settingPerf.checked;
+    applySettings();
+    saveSettingsToStorage(settings);
+  });
+
+  settingLaunch.addEventListener('change', () => {
+    settings.launch = settingLaunch.value;
+    saveSettingsToStorage(settings);
+  });
+
+  navBrowser.addEventListener('click', () => {
+    closeAllPanels();
+    browserPanel.classList.add('open');
+    setActiveNav('browser');
+    if(!browserFrame.src || browserFrame.src === 'about:blank') {
+      browserFrame.src = 'https://www.google.com/search?igu=1';
+    }
+  });
+
+  btnCloseBrowser.addEventListener('click', () => {
+    browserPanel.classList.remove('open');
+    setActiveNav('home');
+  });
+
+  homeSearchForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const query = homeSearchInput.value.trim();
+    if(query) {
+      closeAllPanels();
+      browserPanel.classList.add('open');
+      setActiveNav('browser');
+      const targetUrl = (query.startsWith('http://') || query.startsWith('https://')) 
+        ? query 
+        : `https://www.google.com/search?q=${encodeURIComponent(query)}&igu=1`;
+      browserFrame.src = targetUrl;
+    }
+  });
+
+  async function loadGames(){
+    gamesGrid.style.display = 'none';
+    gamesEmpty.style.display = 'none';
+    gamesMenuLoading.style.display = 'flex';
+
+    try {
+      const res = await fetch(`/api/games?t=${Date.now()}`);
+      if (!res.ok) throw new Error('Server connection failed');
+      
+      activeGames = await res.json();
+      renderGames(gamesSearch.value);
+    } catch(err) {
+      console.error('Failed to load games:', err);
+      gamesEmpty.style.display = 'flex';
+      gamesEmptyText.textContent = 'could not connect to server to fetch games';
+    } finally {
+      gamesMenuLoading.style.display = 'none';
+      gamesGrid.style.display = 'grid';
+    }
+  }
+
+  function renderGames(filterText = ''){
+    const q = filterText.trim().toLowerCase();
+    const filtered = activeGames.filter(g =>
+      !q || g.title.toLowerCase().includes(q) || (g.tag || '').toLowerCase().includes(q)
+    );
+
+    gamesGrid.innerHTML = '';
+
+    if(activeGames.length === 0){
+      gamesEmpty.style.display = 'flex';
+      gamesEmptyText.textContent = 'no games on the server yet — click "add game" to upload';
+      return;
+    }
+    if(filtered.length === 0){
+      gamesEmpty.style.display = 'flex';
+      gamesEmptyText.textContent = 'no games match "' + filterText + '"';
+      return;
+    }
+    gamesEmpty.style.display = 'none';
+
+    const now = Date.now();
+
+    filtered.forEach(g => {
+      const card = document.createElement('div');
+      card.className = 'game-card';
+
+      const thumb = document.createElement('div');
+      thumb.className = 'game-thumb';
+      if(g.thumbUrl) {
+        const cacheBuster = g.thumbUrl.includes('?') ? `&t=${now}` : `?t=${now}`;
+        thumb.style.backgroundImage = `url("${g.thumbUrl}${cacheBuster}")`;
+        thumb.textContent = '';
+      } else {
+        thumb.style.backgroundImage = '';
+        thumb.textContent = g.title.slice(0, 2).toUpperCase();
+      }
+
+      const info = document.createElement('div');
+      info.className = 'game-info';
+      
+      const title = document.createElement('div');
+      title.className = 'game-title';
+      title.textContent = g.title;
+
+      const tag = document.createElement('div');
+      tag.className = 'game-tag';
+      tag.textContent = g.tag || '';
+
+      info.appendChild(title);
+      info.appendChild(tag);
+
+      const actions = document.createElement('div');
+      actions.className = 'card-actions';
+
+      const btnEdit = document.createElement('button');
+      btnEdit.className = 'card-btn';
+      btnEdit.title = 'Edit Title/Image/Files';
+      btnEdit.type = 'button';
+      btnEdit.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+      btnEdit.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openEditModal(g);
+      });
+
+      const btnDel = document.createElement('button');
+      btnDel.className = 'card-btn';
+      btnDel.title = 'Delete Game';
+      btnDel.type = 'button';
+      btnDel.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+      btnDel.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if(confirm('Delete "' + g.title + '" permanently from server?')){
+          await fetch(`/api/games/${encodeURIComponent(g.id)}`, { method: 'DELETE' });
+          loadGames();
+        }
+      });
+
+      actions.appendChild(btnEdit);
+      actions.appendChild(btnDel);
+
+      card.appendChild(thumb);
+      card.appendChild(info);
+      card.appendChild(actions);
+
+      card.addEventListener('click', () => playGame(g));
+      gamesGrid.appendChild(card);
+    });
+  }
+
+  gamesSearch.addEventListener('input', () => renderGames(gamesSearch.value));
+
+  function playGame(game){
+    if(settings.launch === 'newtab'){
+      window.open(game.playUrl, '_blank', 'noopener');
+      return;
+    }
+    playerTitle.textContent = game.title;
+    loadingText.textContent = `loading ${game.title}…`;
+    playerLoading.classList.remove('hidden');
+
+    gameFrame.src = game.playUrl;
+    gamePlayer.classList.add('open');
+  }
+
+  gameFrame.addEventListener('load', () => {
+    if (gameFrame.src && gameFrame.src !== 'about:blank') {
+      setTimeout(() => {
+        playerLoading.classList.add('hidden');
+      }, 300);
+    }
+  });
+
+  document.getElementById('btnPlayerBack').addEventListener('click', () => {
+    gamePlayer.classList.remove('open');
+    gameFrame.src = 'about:blank';
+    playerLoading.classList.remove('hidden');
+  });
+
+  document.getElementById('btnAddGame').addEventListener('click', () => addGameModal.classList.add('open'));
+  document.getElementById('btnCancelAddGame').addEventListener('click', () => addGameModal.classList.remove('open'));
+
+  document.getElementById('addGameForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('gameTitleInput').value.trim();
+    const thumbUrl = document.getElementById('gameThumbInput').value.trim();
+    const tag = document.getElementById('gameTagInput').value.trim();
+    const folderInput = document.getElementById('gameFolderInput');
+    const fileInput = document.getElementById('gameFileInput');
+
+    const selectedFiles = folderInput.files.length > 0 ? Array.from(folderInput.files) : Array.from(fileInput.files);
+
+    if(selectedFiles.length === 0){
+      alert('Please select files or a folder to upload.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('thumbUrl', thumbUrl);
+    formData.append('tag', tag);
+
+    selectedFiles.forEach(file => {
+      formData.append('files', file);
+      formData.append('paths', file.webkitRelativePath || file.name);
+    });
+
+    const btnSave = document.getElementById('btnSaveGame');
+    btnSave.textContent = 'Uploading...';
+    btnSave.disabled = true;
+
+    try {
+      const res = await fetch('/api/games', {
+        method: 'POST',
+        body: formData
+      });
+      if(!res.ok) throw new Error('Failed to upload');
+
+      addGameModal.classList.remove('open');
+      document.getElementById('addGameForm').reset();
+      await loadGames();
+    } catch(err) {
+      alert('Failed to upload game.');
+    } finally {
+      btnSave.textContent = 'upload to server';
+      btnSave.disabled = false;
+    }
+  });
+
+  function openEditModal(game){
+    document.getElementById('editGameId').value = game.id;
+    document.getElementById('editTitleInput').value = game.title;
+    document.getElementById('editThumbInput').value = game.thumbUrl || '';
+    document.getElementById('editTagInput').value = game.tag || '';
+    document.getElementById('editThumbFileInput').value = '';
+    document.getElementById('editFolderInput').value = '';
+    document.getElementById('editFileInput').value = '';
+    editGameModal.classList.add('open');
+  }
+
+  document.getElementById('btnCancelEditGame').addEventListener('click', () => editGameModal.classList.remove('open'));
+
+  document.getElementById('editGameForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('editGameId').value;
+    const title = document.getElementById('editTitleInput').value.trim();
+    const thumbUrl = document.getElementById('editThumbInput').value.trim();
+    const tag = document.getElementById('editTagInput').value.trim();
+    const thumbFile = document.getElementById('editThumbFileInput').files[0];
+    const folderInput = document.getElementById('editFolderInput');
+    const fileInput = document.getElementById('editFileInput');
+
+    const selectedFiles = folderInput.files.length > 0 ? Array.from(folderInput.files) : Array.from(fileInput.files);
+
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('title', title);
+    formData.append('thumbUrl', thumbUrl);
+    formData.append('tag', tag);
+    
+    if (thumbFile) {
+      formData.append('thumbFile', thumbFile);
+    }
+
+    selectedFiles.forEach(file => {
+      formData.append('files', file);
+      formData.append('paths', file.webkitRelativePath || file.name);
+    });
+
+    const btnSave = document.getElementById('btnSaveEditGame');
+    btnSave.textContent = 'Saving...';
+    btnSave.disabled = true;
+
+    try {
+      const res = await fetch(`/api/games/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        body: formData
+      });
+
+      if (!res.ok) {
+        alert('Failed to update game details.');
+        return;
+      }
+
+      editGameModal.classList.remove('open');
+      document.getElementById('editGameForm').reset();
+      await loadGames();
+    } catch (err) {
+      console.error('Edit error:', err);
+      alert('Error updating game.');
+    } finally {
+      btnSave.textContent = 'save changes';
+      btnSave.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
