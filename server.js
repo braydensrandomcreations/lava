@@ -51,7 +51,7 @@ async function autoFetchThumbnail(title) {
       const pages = wikiData.query?.pages;
 
       if (pages) {
-        const firstPage = Object.values(pages)[0];
+        const firstPage = Object.values(pages);
         let imageUrl = firstPage?.thumbnail?.source;
 
         if (imageUrl) {
@@ -59,7 +59,7 @@ async function autoFetchThumbnail(title) {
           const imgRes = await fetch(imageUrl, { headers });
           if (imgRes.ok) {
             const contentType = imgRes.headers.get('content-type') || '';
-            let ext = path.extname(imageUrl.split('?')[0]);
+            let ext = path.extname(imageUrl.split('?'));
             if (!ext || ext.length > 5) {
               ext = contentType.includes('jpeg') || contentType.includes('jpg') ? '.jpg' : '.png';
             }
@@ -99,13 +99,7 @@ async function autoFetchThumbnail(title) {
   return '';
 }
 
-// Helpers for JSON + Auto-Directory Scanner
-
 // Plain read of games.json — no filesystem scanning.
-// Use this everywhere EXCEPT the GET /api/games route, so that adding/updating/
-// deleting a game never triggers the uploads-folder scan (which would otherwise
-// auto-index a brand-new game's folder before its real entry is saved, creating
-// a duplicate with the folder/id as the title).
 async function readGamesFile() {
   try {
     return await fs.readJson(GAMES_FILE);
@@ -161,13 +155,42 @@ async function saveGames(games) {
   await fs.writeJson(GAMES_FILE, games, { spaces: 2 });
 }
 
-// GET all games
+// GET all games (Now mixed with automated external arcade catalog!)
 app.get('/api/games', async (req, res) => {
   try {
-    const games = await getGames();
-    res.json(games);
+    // 1. Fetch your custom games list layout array
+    const localGames = await getGames();
+
+    // 2. Fetch the automated 100% free cloud distribution stream
+    const partnerResponse = await fetch('https://pub.gamezop.com/v3/games?id=4393');
+    
+    if (!partnerResponse.ok) {
+      return res.json(localGames);
+    }
+
+    const partnerData = await partnerResponse.json();
+
+    // 3. Map partner items to match your exact data design payload schema
+    const formattedPartnerGames = partnerData.games.map(game => ({
+      id: `partner-${game.code}`,
+      title: game.name.en,
+      thumbUrl: game.assets.square,
+      tag: game.tags ? game.tags : 'arcade',
+      playUrl: game.url // Streams live right from their web endpoints!
+    }));
+
+    // 4. Combine both libraries seamlessly
+    const completeLibrary = [...localGames, ...formattedPartnerGames];
+    res.json(completeLibrary);
+
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch games' });
+    console.error('[Combined Catalog Route Error]', err);
+    try {
+      const fallbackGames = await getGames();
+      res.json(fallbackGames);
+    } catch {
+      res.status(500).json({ error: 'Failed to fetch games library' });
+    }
   }
 });
 
@@ -191,7 +214,7 @@ app.post('/api/games', upload.array('files'), async (req, res) => {
         const file = req.files[i];
         const relPath = paths[i] || file.originalname;
         const pathParts = relPath.split('/').filter(Boolean);
-        const cleanRelPath = pathParts.length > 1 ? pathParts.slice(1).join('/') : pathParts[0];
+        const cleanRelPath = pathParts.length > 1 ? pathParts.slice(1).join('/') : pathParts;
 
         const destPath = path.join(gameFolder, cleanRelPath);
         await fs.ensureDir(path.dirname(destPath));
