@@ -398,6 +398,7 @@
         <div class="player-topbar">
           <button class="browser-btn" id="btnPlayerBack" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></button>
           <div class="player-title" id="playerTitle"></div>
+          <button class="browser-btn" id="btnPlayerFullscreen" type="button" title="Toggle Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
         </div>
         <div class="player-body">
           <div class="player-loading" id="playerLoading">
@@ -555,6 +556,7 @@
   const playerTitle = document.getElementById('playerTitle');
   const playerLoading = document.getElementById('playerLoading');
   const loadingText = document.getElementById('loadingText');
+  const btnPlayerFullscreen = document.getElementById('btnPlayerFullscreen');
 
   let activeGames = [];
 
@@ -806,6 +808,26 @@
     gamePlayer.classList.add('open');
   }
 
+  btnPlayerFullscreen.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      if (gamePlayer.requestFullscreen) {
+        gamePlayer.requestFullscreen();
+      } else if (gamePlayer.webkitRequestFullscreen) {
+        gamePlayer.webkitRequestFullscreen();
+      } else if (gamePlayer.msRequestFullscreen) {
+        gamePlayer.msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+  });
+
   gameFrame.addEventListener('load', () => {
     if (gameFrame.src && gameFrame.src !== 'about:blank') {
       setTimeout(() => {
@@ -815,6 +837,9 @@
   });
 
   document.getElementById('btnPlayerBack').addEventListener('click', () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
     gamePlayer.classList.remove('open');
     gameFrame.src = 'about:blank';
     playerLoading.classList.remove('hidden');
@@ -938,5 +963,5 @@
   });
 })();
 </script>
-</body>
+  </body>
 </html>
