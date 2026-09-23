@@ -248,7 +248,7 @@
   .modal-card h2{ margin:0 0 16px; font-family:'Fredoka', sans-serif; font-size:22px; font-weight:600; color: var(--ink); }
   .modal-field{ margin-bottom:12px; }
   .modal-field label{ display:block; font-size:12.5px; font-weight:700; color: rgba(92,22,22,0.6); margin-bottom:5px; }
-  .modal-field input[type="text"]{ width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid rgba(90,20,20,0.15); font-family:'Quicksand', sans-serif; font-weight:600; font-size:14px; color: var(--ink); outline:none; }
+  .modal-field input[type="text"], .modal-field input[type="password"]{ width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid rgba(90,20,20,0.15); font-family:'Quicksand', sans-serif; font-weight:600; font-size:14px; color: var(--ink); outline:none; }
   .modal-field input[type="file"]{ width:100%; padding:8px 10px; border-radius:10px; border:1.5px dashed rgba(90,20,20,0.25); background: rgba(90,20,20,0.02); font-family:'Quicksand', sans-serif; font-weight:600; font-size:13px; color: var(--ink); cursor:pointer; }
   .modal-field input:focus{ border-color: var(--red); }
   .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
@@ -306,6 +306,42 @@
   }
   .setting-switch input:checked + .setting-slider{ background: var(--red); }
   .setting-switch input:checked + .setting-slider::before{ transform: translateX(20px); }
+
+  /* ---------- DEVELOPER MODE ---------- */
+  body:not(.dev-mode) .dev-only{ display:none !important; }
+
+  /* ---------- DEBUG PANEL (developer mode) ---------- */
+  .dbg-tabs{ display:flex; gap:6px; }
+  .dbg-tab{ border:none; background:rgba(90,20,20,0.06); color:var(--ink); font-family:'Quicksand', sans-serif; font-weight:700; font-size:13px; padding:8px 12px; border-radius:10px; cursor:pointer; }
+  .dbg-tab.active{ background:var(--red); color:#fff; }
+  .dbg-body{ flex:1; min-height:0; display:flex; flex-direction:column; background:#fff; }
+  .dbg-view{ display:none; flex:1; min-height:0; flex-direction:column; }
+  .dbg-view.active{ display:flex; }
+  .dbg-toolbar{ display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid rgba(90,20,20,0.08); flex-shrink:0; flex-wrap:wrap; }
+  .dbg-note{ font-size:12.5px; font-weight:600; color:rgba(92,22,22,0.6); }
+  .dbg-log{ flex:1; min-height:0; overflow:auto; padding:10px 14px; font-family:ui-monospace, Menlo, Consolas, monospace; font-size:12px; line-height:1.5; background:#1d1416; color:#f3e3dc; }
+  .dbg-line{ white-space:pre-wrap; word-break:break-word; }
+  .dbg-line .ts{ opacity:.45; margin-right:8px; }
+  .dbg-line.error, .dbg-line.bad{ color:#ff8f8f; }
+  .dbg-line.warn{ color:#ffd479; }
+  .dbg-line.net{ color:#8fd3ff; }
+  .dbg-line.debug{ opacity:.6; }
+  .dbg-line.input{ color:#fff; }
+  .dbg-line.result{ color:#9be59b; }
+  .dbg-eval{ display:flex; align-items:center; gap:8px; padding:8px 14px; background:#2a1d20; color:#f3e3dc; font-family:ui-monospace, Menlo, Consolas, monospace; flex-shrink:0; margin:0; }
+  .dbg-eval input{ flex:1; background:transparent; border:none; outline:none; color:#fff; font-family:ui-monospace, Menlo, Consolas, monospace; font-size:13px; }
+  .dbg-checks{ flex:1; min-height:0; overflow:auto; padding:12px 14px; display:flex; flex-direction:column; gap:8px; }
+  .dbg-check{ display:flex; gap:10px; align-items:flex-start; background:var(--cream); border:1px solid rgba(90,20,20,0.08); border-radius:12px; padding:10px 12px; }
+  .dbg-dot{ width:11px; height:11px; border-radius:50%; margin-top:4px; flex-shrink:0; background:#bbb; }
+  .dbg-dot.ok{ background:#2fb36b; }
+  .dbg-dot.warn{ background:#f2a51f; }
+  .dbg-dot.bad{ background:#e2434a; }
+  .dbg-check-name{ font-size:13.5px; font-weight:700; color:var(--ink); }
+  .dbg-check-detail{ font-size:12px; font-weight:600; color:rgba(92,22,22,0.6); word-break:break-word; margin-top:2px; }
+  .dbg-table-wrap{ flex:1; min-height:0; overflow:auto; }
+  .dbg-table{ border-collapse:collapse; width:100%; font-size:12px; }
+  .dbg-table th, .dbg-table td{ text-align:left; padding:7px 10px; border-bottom:1px solid rgba(90,20,20,0.08); vertical-align:top; word-break:break-all; color:var(--ink); }
+  .dbg-table th{ position:sticky; top:0; background:var(--cream); font-weight:700; }
 </style>
 </head>
 <body>
@@ -327,6 +363,10 @@
       <button class="nav-item" id="navSettings" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.4.7a7.5 7.5 0 0 0-2.6-1.5L14 2h-4l-.4 2.4a7.5 7.5 0 0 0-2.6 1.5l-2.4-.7-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.4-.7a7.5 7.5 0 0 0 2.6 1.5L10 22h4l.4-2.4a7.5 7.5 0 0 0 2.6-1.5l2.4.7 2-3.4-2-1.5Z"/></svg>
         settings
+      </button>
+      <button class="nav-item dev-only" id="navDebug" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9a4 4 0 0 1 8 0v6a4 4 0 0 1-8 0Z"/><path d="M12 9v10M4 13h4M16 13h4M5 7l3 2M19 7l-3 2M5 20l3-2M19 20l-3-2"/></svg>
+        debug
       </button>
     </div>
     <div class="brand-tag">br4y</div>
@@ -375,7 +415,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
           <input id="gamesSearchInput" type="text" placeholder="search games…">
         </div>
-        <button class="games-add-btn" id="btnAddGame" type="button">
+        <button class="games-add-btn dev-only" id="btnAddGame" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
           add game
         </button>
@@ -406,6 +446,56 @@
             <div class="loading-text" id="loadingText">loading game…</div>
           </div>
           <iframe id="gameFrame" allow="fullscreen; gamepad; autoplay"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEBUG PANEL (developer mode) -->
+    <div class="panel" id="debugPanel">
+      <div class="settings-topbar">
+        <div class="settings-title">debug</div>
+        <div class="dbg-tabs">
+          <button type="button" class="dbg-tab active" data-tab="console">console</button>
+          <button type="button" class="dbg-tab" data-tab="connect">connectivity</button>
+          <button type="button" class="dbg-tab" data-tab="library">library</button>
+        </div>
+        <button class="browser-btn browser-close" id="btnCloseDebug" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="dbg-body">
+        <div class="dbg-view active" id="dbgViewConsole">
+          <div class="dbg-toolbar">
+            <select class="setting-select" id="dbgFilter">
+              <option value="all">everything</option>
+              <option value="error">errors</option>
+              <option value="warn">warnings + errors</option>
+              <option value="net">network</option>
+            </select>
+            <button type="button" class="modal-btn cancel" id="btnDbgCopy">copy</button>
+            <button type="button" class="modal-btn cancel" id="btnDbgClear">clear</button>
+            <span class="dbg-note" id="dbgLogNote"></span>
+          </div>
+          <div class="dbg-log" id="dbgLog"></div>
+          <form class="dbg-eval" id="dbgEvalForm">
+            <span>&gt;</span>
+            <input id="dbgEvalInput" type="text" placeholder="run javascript, e.g. lava.games.length" autocomplete="off" spellcheck="false">
+          </form>
+        </div>
+        <div class="dbg-view" id="dbgViewConnect">
+          <div class="dbg-toolbar">
+            <button type="button" class="modal-btn save" id="btnDbgRun">run checks</button>
+            <span class="dbg-note" id="dbgRunNote"></span>
+          </div>
+          <div class="dbg-checks" id="dbgChecks"></div>
+        </div>
+        <div class="dbg-view" id="dbgViewLibrary">
+          <div class="dbg-toolbar">
+            <button type="button" class="modal-btn save" id="btnDbgRefresh">refresh library</button>
+            <button type="button" class="modal-btn cancel" id="btnDbgClearThumbs">clear thumbnail cache</button>
+            <button type="button" class="modal-btn cancel" id="btnDbgClearLocal">clear local edits</button>
+            <button type="button" class="modal-btn cancel" id="btnDbgClearAll">clear cached data</button>
+          </div>
+          <div class="dbg-toolbar"><span class="dbg-note" id="dbgLibSummary"></span></div>
+          <div class="dbg-table-wrap"><table class="dbg-table" id="dbgLibTable"></table></div>
         </div>
       </div>
     </div>
@@ -450,72 +540,80 @@
             <option value="newtab">open in a new tab</option>
           </select>
         </div>
+        <div class="setting-card">
+          <div class="setting-info" style="flex:1;min-width:0;">
+            <h3>developer mode</h3>
+            <p>unlock adding games and editing names and thumbnails. needs the developer password.</p>
+            <div class="dev-only" style="margin-top:10px;">
+              <p id="devHashNote"></p>
+              <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
+                <input class="setting-select" id="devHashOut" type="text" readonly style="flex:1;min-width:0;font-size:11px;">
+                <button type="button" class="modal-btn cancel" id="btnDevChangePass">change password</button>
+              </div>
+            </div>
+          </div>
+          <label class="setting-switch">
+            <input type="checkbox" id="settingDev">
+            <span class="setting-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-card dev-only">
+          <div class="setting-info">
+            <h3>github token (for saving edits)</h3>
+            <p>lets name and thumbnail edits save to the repo so every visitor sees them. use a fine-grained token limited to the lava-games repo with contents: read and write. stored only in this browser.</p>
+          </div>
+          <input class="setting-select" id="settingToken" type="password" placeholder="github_pat_…" autocomplete="off" style="width:190px;">
+        </div>
       </div>
     </div>
 
-    <!-- ADD GAME MODAL -->
-    <div class="modal-overlay" id="addGameModal">
-      <form class="modal-card" id="addGameForm">
-        <h2>add a game</h2>
+    <!-- DEVELOPER PASSWORD MODAL -->
+    <div class="modal-overlay" id="devPassModal">
+      <form class="modal-card" id="devPassForm">
+        <h2 id="devPassTitle">developer password</h2>
         <div class="modal-field">
-          <label for="gameTitleInput">title</label>
-          <input id="gameTitleInput" type="text" placeholder="e.g. Flappy Bird" required>
+          <label for="devPassInput">password</label>
+          <input id="devPassInput" type="password" autocomplete="off">
+        </div>
+        <div class="modal-field" id="devPassConfirmField" style="display:none;">
+          <label for="devPassConfirm">confirm password</label>
+          <input id="devPassConfirm" type="password" autocomplete="off">
         </div>
         <div class="modal-field">
-          <label for="gameThumbInput">image address url (optional)</label>
-          <input id="gameThumbInput" type="text" placeholder="https://example.com/image.png">
-        </div>
-        <div class="modal-field">
-          <label for="gameFolderInput">select game folder (contains index.html)</label>
-          <input id="gameFolderInput" type="file" webkitdirectory directory multiple>
-        </div>
-        <div class="modal-field">
-          <label for="gameFileInput">or select game files / HTML / ZIP archive</label>
-          <input id="gameFileInput" type="file" accept=".html,.htm,.zip,.js,.css" multiple>
-        </div>
-        <div class="modal-field">
-          <label for="gameTagInput">tag (optional)</label>
-          <input id="gameTagInput" type="text" placeholder="offline">
+          <div id="devPassMsg" style="font-size:12.5px;font-weight:700;color:rgba(92,22,22,0.6);"></div>
         </div>
         <div class="modal-actions">
-          <button type="button" class="modal-btn cancel" id="btnCancelAddGame">cancel</button>
-          <button type="submit" class="modal-btn save" id="btnSaveGame">upload to server</button>
+          <button type="button" class="modal-btn cancel" id="btnDevPassCancel">cancel</button>
+          <button type="submit" class="modal-btn save" id="btnDevPassSubmit">unlock</button>
         </div>
       </form>
     </div>
 
-    <!-- EDIT GAME MODAL -->
-    <div class="modal-overlay" id="editGameModal">
-      <form class="modal-card" id="editGameForm">
-        <h2>edit game</h2>
-        <input type="hidden" id="editGameId">
+    <!-- EDIT GAME MODAL (name + thumbnail) -->
+    <div class="modal-overlay" id="thumbModal">
+      <form class="modal-card" id="thumbForm">
+        <h2 id="thumbModalTitle">edit game</h2>
+        <input type="hidden" id="thumbGameId">
         <div class="modal-field">
-          <label for="editTitleInput">title</label>
-          <input id="editTitleInput" type="text" required>
+          <label for="editNameInput">name</label>
+          <input id="editNameInput" type="text" autocomplete="off">
         </div>
         <div class="modal-field">
-          <label for="editThumbInput">image address url</label>
-          <input id="editThumbInput" type="text" placeholder="https://example.com/image.png">
+          <label>thumbnail, step 1: find an image</label>
+          <button type="button" class="modal-btn save" id="btnThumbGoogle" style="width:100%;">search google images</button>
         </div>
         <div class="modal-field">
-          <label for="editThumbFileInput">or upload thumbnail file from computer</label>
-          <input id="editThumbFileInput" type="file" accept="image/*">
+          <label for="thumbUrlInput">step 2: right-click an image → copy image address, then paste it here</label>
+          <input id="thumbUrlInput" type="text" placeholder="https://example.com/image.png" autocomplete="off">
         </div>
         <div class="modal-field">
-          <label for="editFolderInput">replace game folder (optional)</label>
-          <input id="editFolderInput" type="file" webkitdirectory directory multiple>
-        </div>
-        <div class="modal-field">
-          <label for="editFileInput">or replace game files / HTML / ZIP (optional)</label>
-          <input id="editFileInput" type="file" accept=".html,.htm,.zip,.js,.css" multiple>
-        </div>
-        <div class="modal-field">
-          <label for="editTagInput">tag</label>
-          <input id="editTagInput" type="text">
+          <div id="editStatus" style="font-size:12.5px;font-weight:700;color:rgba(92,22,22,0.6);"></div>
         </div>
         <div class="modal-actions">
-          <button type="button" class="modal-btn cancel" id="btnCancelEditGame">cancel</button>
-          <button type="submit" class="modal-btn save" id="btnSaveEditGame">save changes</button>
+          <button type="button" class="modal-btn cancel" id="btnThumbReset">reset</button>
+          <button type="button" class="modal-btn cancel" id="btnThumbCancel">cancel</button>
+          <button type="submit" class="modal-btn save" id="btnThumbSave">save</button>
         </div>
       </form>
     </div>
@@ -524,12 +622,60 @@
 
 <script>
 (function(){
+  // ---------- DEBUG LOG ----------
+  // Always recording (last 400 lines) so nothing is missed; only shown in developer mode.
+  const debugLog = [];
+  const DEBUG_MAX = 400;
+  let debugListener = null;
+
+  function pushLog(level, args, bad){
+    const text = args.map(a => {
+      if(a instanceof Error) return a.stack || a.message;
+      if(a && typeof a === 'object'){ try{ return JSON.stringify(a); }catch(e){ return String(a); } }
+      return String(a);
+    }).join(' ');
+    const entry = { t: Date.now(), level, text: text.slice(0, 2000), bad: !!bad };
+    debugLog.push(entry);
+    if(debugLog.length > DEBUG_MAX) debugLog.shift();
+    if(debugListener){ try{ debugListener(entry); }catch(e){} }
+  }
+
+  ['log', 'info', 'warn', 'error', 'debug'].forEach(level => {
+    const orig = console[level].bind(console);
+    console[level] = (...args) => { pushLog(level, args); orig(...args); };
+  });
+  window.addEventListener('error', e => {
+    pushLog('error', ['uncaught: ' + e.message + (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')' : '')]);
+  });
+  window.addEventListener('unhandledrejection', e => {
+    pushLog('error', ['unhandled promise rejection: ' + ((e.reason && e.reason.message) || e.reason)]);
+  });
+
+  // log every request this page makes (address, result, time). Headers/tokens are never logged.
+  const shortUrl = u => u.length > 130 ? u.slice(0, 127) + '…' : u;
+  const realFetch = window.fetch.bind(window);
+  window.fetch = async (input, init) => {
+    const url = typeof input === 'string' ? input : ((input && input.url) || String(input));
+    const method = ((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+    const started = performance.now();
+    try{
+      const res = await realFetch(input, init);
+      pushLog('net', [method + ' ' + shortUrl(url) + ' → ' + res.status + ' (' + Math.round(performance.now() - started) + 'ms)'], !res.ok);
+      return res;
+    }catch(err){
+      pushLog('net', [method + ' ' + shortUrl(url) + ' FAILED: ' + err.message], true);
+      throw err;
+    }
+  };
+
   const navHome = document.getElementById('navHome');
   const navGames = document.getElementById('navGames');
   const navBrowser = document.getElementById('navBrowser');
   const navSettings = document.getElementById('navSettings');
+  const navDebug = document.getElementById('navDebug');
 
   const settingsPanel = document.getElementById('settingsPanel');
+  const debugPanel = document.getElementById('debugPanel');
   const btnCloseSettings = document.getElementById('btnCloseSettings');
   const settingTheme = document.getElementById('settingTheme');
   const settingPerf = document.getElementById('settingPerf');
@@ -548,8 +694,6 @@
   const gamesSearch = document.getElementById('gamesSearchInput');
   const gamesMenuLoading = document.getElementById('gamesMenuLoading');
 
-  const addGameModal = document.getElementById('addGameModal');
-  const editGameModal = document.getElementById('editGameModal');
 
   const gamePlayer = document.getElementById('gamePlayer');
   const gameFrame = document.getElementById('gameFrame');
@@ -558,20 +702,25 @@
   const loadingText = document.getElementById('loadingText');
   const btnPlayerFullscreen = document.getElementById('btnPlayerFullscreen');
 
+  const thumbModal = document.getElementById('thumbModal');
+  const thumbUrlInput = document.getElementById('thumbUrlInput');
+
   let activeGames = [];
 
   function setActiveNav(which){
-    [navHome, navGames, navBrowser, navSettings].forEach(b => b.classList.remove('active'));
+    [navHome, navGames, navBrowser, navSettings, navDebug].forEach(b => b.classList.remove('active'));
     if(which === 'home') navHome.classList.add('active');
     if(which === 'games') navGames.classList.add('active');
     if(which === 'browser') navBrowser.classList.add('active');
     if(which === 'settings') navSettings.classList.add('active');
+    if(which === 'debug') navDebug.classList.add('active');
   }
 
   function closeAllPanels(){
     browserPanel.classList.remove('open');
     gamesPanel.classList.remove('open');
     settingsPanel.classList.remove('open');
+    debugPanel.classList.remove('open');
   }
 
   navHome.addEventListener('click', () => { closeAllPanels(); setActiveNav('home'); });
@@ -683,25 +832,594 @@
     }
   });
 
+  // ---------- GITHUB GAME LIBRARY ----------
+  // Games are read straight from the GitHub repo: every top-level folder that
+  // contains an index.html shows up as a game. No games.json / server.js needed.
+  const GH_OWNER  = 'braydensrandomcreations';
+  const GH_REPO   = 'lava-games';
+  const GH_BRANCH = 'main';
+
+  // Games are found by scanning the repo's folders for index.html and are played straight
+  // from those repo files, served through the jsDelivr CDN (no GitHub Pages needed).
+  // GitHub's own raw file links can't be used to run games: they label every file "plain text".
+  const API_BASE = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}`;
+  const cdnBase  = ref => `https://cdn.jsdelivr.net/gh/${GH_OWNER}/${GH_REPO}@${ref}/`;
+  const OVERRIDES_FILE = 'lava-overrides.json';   // shared name/thumbnail edits, see below
+  const UPLOAD_URL = `https://github.com/${GH_OWNER}/${GH_REPO}/upload/${GH_BRANCH}`;
+
+  const CACHE_KEY = 'lava_games_cache_v4';
+  const CACHE_TTL = 5 * 60 * 1000; // GitHub's API allows 60 requests/hour per visitor, so cache
+
+  // optional per-folder tweaks: { title, tag, thumb, search }
+  //   thumb  = any image URL (always wins)
+  //   search = what to look up on Wikipedia if the title alone won't find it
+  // folders without an entry get a title made from the folder name
+  const GAME_OVERRIDES = {
+    'btd1':     { title: 'Bloons TD 1', search: 'Bloons Tower Defense' },
+    'btd2':     { title: 'Bloons TD 2', search: 'Bloons Tower Defense' },
+    'btd3':     { title: 'Bloons TD 3', search: 'Bloons Tower Defense' },
+    'btd4':     { title: 'Bloons TD 4', search: 'Bloons Tower Defense' },
+    'btd5':     { title: 'Bloons TD 5', search: 'Bloons Tower Defense' },
+    'bloons':   { title: 'Bloons',      search: 'Bloons Tower Defense' },
+    'moto-x3m': { title: 'Moto X3M' },
+    '2048':     { title: '2048' }
+  };
+
+  // Thumbnails found inside the repo itself (checked before any online lookup):
+  // any image in the game's folder named like thumbnail / cover / preview / splash / title / logo / icon
+  const IMG_RE = /\.(png|jpe?g|webp|gif|svg|ico)$/i;
+
+  function scoreImage(rest, size){
+    const file = rest[rest.length - 1];
+    if(!IMG_RE.test(file)) return -1;
+    if(size && (size < 300 || size > 1500000)) return -1;
+    const base = file.replace(/\.[^.]+$/, '').toLowerCase();
+    let s;
+    if(/^(thumb(nail)?s?|cover|preview|poster|banner|screenshot|og[-_]?image|social|share)/.test(base)) s = 100;
+    else if(/^favicon/.test(base)) s = 20;
+    else if(/^(splash|title|titlescreen|menu|logo|loading|icon|app[-_]?icon|apple[-_]touch[-_]icon)/.test(base)) s = 60;
+    else return -1;
+    s -= (rest.length - 1) * 8;               // prefer files near the top of the folder
+    if(/\.svg$/i.test(file)) s -= 10;
+    if(/\.ico$/i.test(file)) s -= 30;
+    return s;
+  }
+
+  function prettifyName(dir){
+    return dir.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  function encodePath(p){
+    return p.split('/').map(encodeURIComponent).join('/');
+  }
+
+  function buildGames(tree, ref, remote){
+    remote = remote || {};
+    const cdn = cdnBase(ref);
+    const found = new Map();
+
+    tree.forEach(item => {
+      if(item.type !== 'blob') return;
+      const parts = item.path.split('/');
+      if(parts.length < 2 || parts[0].startsWith('.')) return;
+
+      const dir = parts[0];
+      const rest = parts.slice(1);
+      let g = found.get(dir);
+      if(!g){ g = { dir, index: null, thumb: null, thumbScore: -1 }; found.set(dir, g); }
+
+      if(rest[rest.length - 1].toLowerCase() === 'index.html'){
+        const p = rest.join('/');
+        if(!g.index || rest.length < g.index.split('/').length) g.index = p;
+      }
+      const sc = scoreImage(rest, item.size);
+      if(sc > g.thumbScore){ g.thumbScore = sc; g.thumb = item.path; }
+    });
+
+    return Array.from(found.values())
+      .filter(g => g.index)
+      .map(g => {
+        const o = GAME_OVERRIDES[g.dir] || {};
+        const r = remote[g.dir] || {};
+        const baseTitle = o.title || prettifyName(g.dir);
+        const baseThumb = o.thumb || (g.thumb ? cdn + encodePath(g.thumb) : '');
+        return {
+          id: g.dir,
+          baseTitle,
+          baseThumb,
+          title: r.title || baseTitle,
+          search: o.search || '',
+          tag: r.tag || o.tag || '',
+          thumbUrl: r.thumb || baseThumb,
+          playUrl: cdn + encodePath(g.dir) + '/' + encodePath(g.index)
+        };
+      })
+      .sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
+  }
+
+  function readCache(allowStale){
+    try{
+      const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+      if(c && Array.isArray(c.games) && (allowStale || Date.now() - c.time < CACHE_TTL)) return c.games;
+    }catch(e){}
+    return null;
+  }
+
+  // names + thumbnails edited in the full version live in this one file in the repo,
+  // and every visitor reads it, so everyone sees the same thing
+  async function fetchOverrides(tree, ref){
+    if(!tree.some(t => t.type === 'blob' && t.path === OVERRIDES_FILE)) return {};
+    const res = await fetch(cdnBase(ref) + OVERRIDES_FILE);
+    if(!res.ok) throw new Error('overrides ' + res.status);
+    const data = await res.json();
+    return (data && typeof data === 'object') ? data : {};
+  }
+
+  async function fetchLibrary(){
+    const fresh = readCache(false);
+    if(fresh){ console.debug('[library] using saved list (' + fresh.length + ' games)'); return fresh; }
+
+    try{
+      const headers = { 'Accept': 'application/vnd.github+json' };
+
+      // pin everything to the newest commit so new games show up right away
+      // (the CDN can hold on to a plain "main" for hours)
+      let ref = GH_BRANCH, treeRef = GH_BRANCH;
+      try{
+        const cr = await fetch(`${API_BASE}/commits/${GH_BRANCH}`, { headers });
+        if(cr.ok){
+          const c = await cr.json();
+          if(c.sha && c.commit && c.commit.tree && c.commit.tree.sha){ ref = c.sha; treeRef = c.commit.tree.sha; }
+        }
+      }catch(e){ /* fall back to the branch name */ }
+
+      const res = await fetch(`${API_BASE}/git/trees/${treeRef}?recursive=1`, { headers });
+      if(!res.ok) throw new Error('GitHub responded ' + res.status);
+      const data = await res.json();
+      const remote = await fetchOverrides(data.tree || [], ref);
+      const games = buildGames(data.tree || [], ref, remote);
+      console.info('[library] loaded ' + games.length + ' games from GitHub @' + String(ref).slice(0, 7) + (data.truncated ? ' (file list was truncated!)' : ''));
+      try{ localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), games })); }catch(e){}
+      return games;
+    }catch(err){
+      const stale = readCache(true);   // rate-limited or offline: fall back to the last good copy
+      console.warn('[library] GitHub failed (' + err.message + '), ' + (stale ? 'using the last saved list' : 'nothing saved to fall back on'));
+      if(stale) return stale;
+      throw err;
+    }
+  }
+
   async function loadGames(){
     gamesGrid.style.display = 'none';
     gamesEmpty.style.display = 'none';
     gamesMenuLoading.style.display = 'flex';
 
     try {
-      const res = await fetch(`/api/games?t=${Date.now()}`);
-      if (!res.ok) throw new Error('Server connection failed');
-      
-      activeGames = await res.json();
-      renderGames(gamesSearch.value);
+      rawGames = await fetchLibrary();
+      refreshGames();
     } catch(err) {
       console.error('Failed to load games:', err);
       gamesEmpty.style.display = 'flex';
-      gamesEmptyText.textContent = 'could not connect to server to fetch games';
+      gamesEmptyText.textContent = 'could not load games from GitHub — try again in a minute';
     } finally {
       gamesMenuLoading.style.display = 'none';
       gamesGrid.style.display = 'grid';
     }
+  }
+
+  // ---------- DEVELOPER MODE ----------
+  // Adding games and editing names/thumbnails stay hidden until developer mode is switched on
+  // in settings, which needs a password. This is a convenience lock, not real security (anyone
+  // can read this file). What actually protects the repo is the GitHub token.
+  const DEV_PASSWORD_HASH = '5a43ef8d1bbfa026ecff2fefc169e7d848813066534049ef406b0b7576b0d269';   // developer password lock (applies to everyone)
+  const DEV_HASH_KEY = 'lava_dev_hash_v1';
+  const DEV_SESSION_KEY = 'lava_dev_on';
+
+  const settingDev = document.getElementById('settingDev');
+  const devPassModal = document.getElementById('devPassModal');
+  const devPassInput = document.getElementById('devPassInput');
+  const devPassConfirm = document.getElementById('devPassConfirm');
+  const devPassConfirmField = document.getElementById('devPassConfirmField');
+  const devPassTitle = document.getElementById('devPassTitle');
+  const devPassMsg = document.getElementById('devPassMsg');
+  const devPassSubmit = document.getElementById('btnDevPassSubmit');
+  const devHashOut = document.getElementById('devHashOut');
+  const devHashNote = document.getElementById('devHashNote');
+  const btnDevChangePass = document.getElementById('btnDevChangePass');
+  let devPassMode = 'unlock';
+
+  async function hashPassword(pw){
+    if(typeof crypto === 'undefined' || !crypto.subtle) throw new Error('needs https or localhost');
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('lava-dev:' + pw));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  function storedHash(){
+    try{ return localStorage.getItem(DEV_HASH_KEY) || ''; }catch(e){ return ''; }
+  }
+  function effectiveHash(){
+    return DEV_PASSWORD_HASH || storedHash();
+  }
+
+  function updateDevExtra(){
+    devHashOut.value = effectiveHash();
+    devHashNote.textContent = DEV_PASSWORD_HASH
+      ? 'password is set in the file, so it applies to everyone.'
+      : 'password is only saved in this browser. to lock it for everyone, paste this hash into DEV_PASSWORD_HASH in the file.';
+    btnDevChangePass.style.display = DEV_PASSWORD_HASH ? 'none' : '';
+  }
+
+  function setDevMode(on){
+    document.body.classList.toggle('dev-mode', on);
+    settingDev.checked = on;
+    try{ if(on) sessionStorage.setItem(DEV_SESSION_KEY, '1'); else sessionStorage.removeItem(DEV_SESSION_KEY); }catch(e){}
+    if(on) updateDevExtra();
+    onDevModeChange(on);
+  }
+
+  function openDevPass(mode){
+    devPassMode = mode;
+    devPassInput.value = '';
+    devPassConfirm.value = '';
+    devPassMsg.textContent = mode === 'set' ? 'no developer password yet. choose one; it is saved in this browser.' : '';
+    devPassConfirmField.style.display = mode === 'unlock' ? 'none' : '';
+    devPassTitle.textContent = mode === 'unlock' ? 'developer password' : (mode === 'set' ? 'set a developer password' : 'change developer password');
+    devPassSubmit.textContent = mode === 'unlock' ? 'unlock' : 'save';
+    devPassModal.classList.add('open');
+    setTimeout(() => devPassInput.focus(), 50);
+  }
+
+  settingDev.addEventListener('change', () => {
+    if(!settingDev.checked){ setDevMode(false); return; }
+    settingDev.checked = false;                 // stays off until the password is accepted
+    openDevPass(effectiveHash() ? 'unlock' : 'set');
+  });
+
+  btnDevChangePass.addEventListener('click', () => openDevPass('change'));
+  document.getElementById('btnDevPassCancel').addEventListener('click', () => devPassModal.classList.remove('open'));
+
+  document.getElementById('devPassForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const pw = devPassInput.value;
+    if(!pw){ devPassMsg.textContent = 'enter a password'; return; }
+
+    try{
+      if(devPassMode === 'unlock'){
+        if(await hashPassword(pw) === effectiveHash()){
+          devPassModal.classList.remove('open');
+          setDevMode(true);
+        } else {
+          devPassMsg.textContent = 'wrong password';
+          devPassInput.value = '';
+        }
+        return;
+      }
+
+      if(pw.length < 4){ devPassMsg.textContent = 'use at least 4 characters'; return; }
+      if(pw !== devPassConfirm.value){ devPassMsg.textContent = 'passwords do not match'; return; }
+      localStorage.setItem(DEV_HASH_KEY, await hashPassword(pw));
+      devPassModal.classList.remove('open');
+      setDevMode(true);
+      updateDevExtra();
+    }catch(err){
+      devPassMsg.textContent = err.message || 'something went wrong';
+    }
+  });
+
+  // ---------- EDITING: name + thumbnail ----------
+  // Edits are saved to lava-overrides.json in the repo (needs the GitHub token from settings).
+  // Everyone who opens the site reads that file, so they all see the same names and
+  // thumbnails. Without a token, edits are kept in this browser only.
+  const TOKEN_KEY = 'lava_gh_token_v1';
+  const LOCAL_EDITS_KEY = 'lava_local_edits_v1';
+
+  const settingToken = document.getElementById('settingToken');
+  const thumbNameInput = document.getElementById('editNameInput');
+  const thumbStatus = document.getElementById('editStatus');
+
+  function getToken(){
+    try{ return localStorage.getItem(TOKEN_KEY) || ''; }catch(e){ return ''; }
+  }
+  settingToken.value = getToken();
+  settingToken.addEventListener('change', () => {
+    const t = settingToken.value.trim();
+    try{ if(t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY); }catch(e){}
+  });
+
+  function loadLocalEdits(){
+    try{ return JSON.parse(localStorage.getItem(LOCAL_EDITS_KEY) || '{}') || {}; }
+    catch(e){ return {}; }
+  }
+  function saveLocalEdits(){
+    try{ localStorage.setItem(LOCAL_EDITS_KEY, JSON.stringify(localEdits)); }catch(e){}
+  }
+  let localEdits = loadLocalEdits();
+
+  // bring over thumbnails saved by the earlier version (they were browser-only)
+  try{
+    const old = JSON.parse(localStorage.getItem('lava_thumbs_v1') || 'null');
+    if(old){
+      Object.keys(old).forEach(id => { if(!localEdits[id]) localEdits[id] = { thumb: old[id] }; });
+      saveLocalEdits();
+      localStorage.removeItem('lava_thumbs_v1');
+    }
+  }catch(e){}
+
+  let rawGames = [];   // the library as read from the repo (with the shared edits applied)
+
+  function sortGames(list){
+    return list.slice().sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
+  }
+  function prepareGames(list){        // + edits that only exist in this browser
+    return sortGames(list.map(g => {
+      const e = localEdits[g.id];
+      return e ? { ...g, title: e.title || g.title, thumbUrl: e.thumb || g.thumbUrl } : g;
+    }));
+  }
+  function refreshGames(){
+    activeGames = prepareGames(rawGames);
+    renderGames(gamesSearch.value);
+  }
+
+  const utf8ToB64 = s => btoa(unescape(encodeURIComponent(s)));
+  const b64ToUtf8 = s => decodeURIComponent(escape(atob(s.replace(/\s/g, ''))));
+
+  // read the current file, change one game's entry, write it back (retries if someone else saved first)
+  async function saveOverridesRemote(id, patch){
+    const url = `${API_BASE}/contents/${OVERRIDES_FILE}`;
+    const headers = { 'Authorization': `Bearer ${getToken()}`, 'Accept': 'application/vnd.github+json' };
+
+    for(let attempt = 0; attempt < 2; attempt++){
+      let sha, data = {};
+      const gr = await fetch(`${url}?ref=${GH_BRANCH}&t=${Date.now()}`, { headers });
+      if(gr.ok){
+        const j = await gr.json();
+        sha = j.sha;
+        try{ data = JSON.parse(b64ToUtf8(j.content)) || {}; }catch(e){ data = {}; }
+      } else if(gr.status !== 404){
+        throw new Error(gr.status === 401 || gr.status === 403 ? 'token rejected' : 'GitHub ' + gr.status);
+      }
+
+      if(patch) data[id] = patch; else delete data[id];
+
+      const body = {
+        message: 'lava: update ' + id,
+        content: utf8ToB64(JSON.stringify(data, null, 2) + '\n'),
+        branch: GH_BRANCH
+      };
+      if(sha) body.sha = sha;
+
+      const pr = await fetch(url, {
+        method: 'PUT',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if(pr.ok) return;
+      if(pr.status === 409 || pr.status === 422) continue;
+      throw new Error(pr.status === 401 || pr.status === 403 || pr.status === 404 ? 'token rejected' : 'GitHub ' + pr.status);
+    }
+    throw new Error('file changed while saving, try again');
+  }
+
+  // keep the local copy of the library in step with what was just saved
+  function patchLibrary(id, patch){
+    rawGames = rawGames.map(g => g.id !== id ? g : {
+      ...g,
+      title: (patch && patch.title) || g.baseTitle,
+      thumbUrl: (patch && patch.thumb) || g.baseThumb
+    });
+    try{ localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), games: rawGames })); }catch(e){}
+  }
+
+  let saving = false;
+
+  async function saveEdit(id, patch){        // patch = { title?, thumb? }, or null to reset
+    if(saving) return;
+    const setLocal = () => {
+      if(patch) localEdits[id] = { ...patch }; else delete localEdits[id];
+      saveLocalEdits();
+      refreshGames();
+    };
+
+    if(!getToken()){
+      setLocal();
+      thumbModal.classList.remove('open');
+      return;
+    }
+
+    saving = true;
+    thumbStatus.textContent = 'saving to GitHub…';
+    try{
+      await saveOverridesRemote(id, patch);
+      delete localEdits[id];
+      saveLocalEdits();
+      patchLibrary(id, patch);
+      refreshGames();
+      thumbModal.classList.remove('open');
+    }catch(err){
+      console.error('Save failed:', err);
+      setLocal();
+      thumbStatus.textContent = `couldn't save to GitHub (${err.message}). kept in this browser only. check the token in settings.`;
+    }finally{
+      saving = false;
+    }
+  }
+
+  function openThumbModal(game){
+    document.getElementById('thumbGameId').value = game.id;
+    document.getElementById('thumbModalTitle').textContent = 'edit ' + game.title;
+    thumbNameInput.value = game.title;
+    thumbUrlInput.value = game.thumbUrl !== game.baseThumb ? game.thumbUrl : '';
+    thumbStatus.textContent = getToken()
+      ? 'saves to the GitHub repo, so everyone sees it.'
+      : 'no GitHub token in settings, so this only saves in this browser.';
+    thumbModal.classList.add('open');
+  }
+
+  document.getElementById('btnThumbGoogle').addEventListener('click', () => {
+    const q = encodeURIComponent((thumbNameInput.value.trim() || 'video') + ' game');
+    window.open(`https://www.google.com/search?tbm=isch&q=${q}`, '_blank', 'noopener');
+  });
+
+  document.getElementById('btnThumbCancel').addEventListener('click', () => thumbModal.classList.remove('open'));
+
+  document.getElementById('btnThumbReset').addEventListener('click', () => {
+    saveEdit(document.getElementById('thumbGameId').value, null);
+  });
+
+  document.getElementById('thumbForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = document.getElementById('thumbGameId').value;
+    const game = rawGames.find(g => g.id === id);
+    const title = thumbNameInput.value.trim();
+    const thumb = thumbUrlInput.value.trim();
+
+    if(thumb && !/^https?:\/\//i.test(thumb) && !/^data:image\//i.test(thumb)){
+      alert('Paste a full image address starting with https://');
+      return;
+    }
+
+    const patch = {};
+    if(title && (!game || title !== game.baseTitle)) patch.title = title;
+    if(thumb && (!game || thumb !== game.baseThumb)) patch.thumb = thumb;
+    saveEdit(id, (patch.title || patch.thumb) ? patch : null);
+  });
+
+  // ---------- AUTOMATIC THUMBNAILS ----------
+  // For games with no thumbnail in the repo, one is found automatically, in this order:
+  //   1. the game's own page (its share image / app icon), fetched from the repo
+  //   2. Wikipedia's image for the game (works straight from the browser)
+  //   3. the game's small favicon, shown as an icon on the card
+  // Google itself can't be searched from a web page without a paid API key.
+  // Results are cached in this browser.
+  const AUTO_THUMBS = true;
+  const AUTO_KEY = 'lava_autothumbs_v2';
+  const AUTO_MISS_TTL = 24 * 60 * 60 * 1000; // retry games with no match after a day
+
+  function loadAutoThumbs(){
+    try{ return JSON.parse(localStorage.getItem(AUTO_KEY) || '{}') || {}; }
+    catch(e){ return {}; }
+  }
+  let autoThumbs = loadAutoThumbs();
+  function saveAutoThumbs(){
+    try{ localStorage.setItem(AUTO_KEY, JSON.stringify(autoThumbs)); }catch(e){}
+  }
+
+  function looksAutoNamed(title){
+    return /^game[\s-]?\d+$/i.test(title.trim()) || /^\d{6,}$/.test(title.trim());
+  }
+
+  function titleTokens(s){
+    return s.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  }
+
+  function getAttr(tag, name){
+    const m = tag.match(new RegExp('\\b' + name + '\\s*=\\s*(?:"([^"]*)"|\'([^\']*)\'|([^\\s>]+))', 'i'));
+    return m ? (m[1] || m[2] || m[3] || '') : '';
+  }
+
+  async function findPageImage(game){
+    const res = await fetch(game.playUrl);
+    if(!res.ok) throw new Error('page ' + res.status);
+    const html = (await res.text()).slice(0, 200000);
+    const abs = href => {
+      try{ const u = new URL(href, game.playUrl); return /^https?:$/.test(u.protocol) ? u.href : ''; }
+      catch(e){ return ''; }
+    };
+    let best = '', icon = '';
+
+    (html.match(/<meta\b[^>]*>/gi) || []).forEach(tag => {
+      const key = (getAttr(tag, 'property') || getAttr(tag, 'name')).toLowerCase();
+      if(!best && (key === 'og:image' || key === 'twitter:image' || key === 'twitter:image:src')){
+        best = abs(getAttr(tag, 'content'));
+      }
+    });
+    (html.match(/<link\b[^>]*>/gi) || []).forEach(tag => {
+      const rel = getAttr(tag, 'rel').toLowerCase();
+      const href = getAttr(tag, 'href');
+      if(!href) return;
+      if(!best && rel.includes('apple-touch-icon')) best = abs(href);
+      else if(!icon && /\bicon\b/.test(rel)) icon = abs(href);
+    });
+    return { best, icon };
+  }
+
+  async function findWikipedia(game){
+    const name = game.search || game.title;
+    const q = encodeURIComponent(name + ' video game');
+    const url = 'https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=5' +
+      `&gsrsearch=${q}&prop=pageimages&piprop=thumbnail&pithumbsize=400&pilimit=5` +
+      '&format=json&formatversion=2&origin=*';
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('lookup failed');
+    const data = await res.json();
+    const pages = ((data.query && data.query.pages) || []).slice().sort((a, b) => a.index - b.index);
+    const want = titleTokens(name);
+
+    // only accept an article whose title contains every word we searched for,
+    // so a game with no article doesn't get a random unrelated picture
+    for(const p of pages){
+      if(!p.thumbnail || !p.thumbnail.source) continue;
+      const have = titleTokens(p.title);
+      if(want.length && want.every(w => have.includes(w))) return p.thumbnail.source;
+    }
+    return '';
+  }
+
+  async function resolveAuto(game){
+    let page = { best: '', icon: '' }, pageFailed = false;
+    try{ page = await findPageImage(game); }catch(e){ pageFailed = true; }
+    if(page.best) return { url: page.best };
+
+    let wiki = '', wikiFailed = false;
+    if(!looksAutoNamed(game.title)){
+      try{ wiki = await findWikipedia(game); }catch(e){ wikiFailed = true; }
+    }
+    if(wiki) return { url: wiki };
+    if(page.icon) return { url: page.icon, fit: 'icon' };
+
+    if(pageFailed || wikiFailed) throw new Error('lookup failed'); // don't remember a miss caused by an error
+    return { url: '' };
+  }
+
+  const autoQueue = [];
+  let autoWorkers = 0;
+
+  function pumpAutoQueue(){
+    while(autoWorkers < 3 && autoQueue.length){
+      const job = autoQueue.shift();
+      autoWorkers++;
+      resolveAuto(job.game)
+        .then(entry => {
+          autoThumbs[job.game.id] = { url: entry.url, fit: entry.fit || '', time: Date.now() };
+          saveAutoThumbs();
+          console.debug('[thumb] ' + job.game.id + ' → ' + (entry.url ? entry.url.slice(0, 90) : 'no match'));
+          if(entry.url) showAutoThumb(job.el, entry);
+        })
+        .catch(err => { console.warn('[thumb] ' + job.game.id + ' lookup failed: ' + (err && err.message)); })
+        .finally(() => { autoWorkers--; pumpAutoQueue(); });
+    }
+  }
+
+  function showAutoThumb(el, entry){
+    if(entry.fit === 'icon'){
+      el.style.backgroundImage = `url("${entry.url}"), linear-gradient(135deg, var(--orange), var(--red))`;
+      el.style.backgroundSize = '42% auto, cover';
+      el.style.backgroundRepeat = 'no-repeat, no-repeat';
+    } else {
+      el.style.backgroundImage = `url("${entry.url}")`;
+    }
+    el.textContent = '';
+  }
+
+  function autoThumb(game, el){
+    if(!AUTO_THUMBS) return;
+    const hit = autoThumbs[game.id];
+    if(hit){
+      if(hit.url){ showAutoThumb(el, hit); return; }
+      if(Date.now() - hit.time < AUTO_MISS_TTL) return;
+    }
+    if(!autoQueue.some(j => j.game.id === game.id && j.el === el)) autoQueue.push({ game, el });
+    pumpAutoQueue();
   }
 
   function renderGames(filterText = ''){
@@ -714,7 +1432,7 @@
 
     if(activeGames.length === 0){
       gamesEmpty.style.display = 'flex';
-      gamesEmptyText.textContent = 'no games on the server yet — click "add game" to upload';
+      gamesEmptyText.textContent = 'no games found in the GitHub repo yet — click "add game" to upload one';
       return;
     }
     if(filtered.length === 0){
@@ -724,26 +1442,23 @@
     }
     gamesEmpty.style.display = 'none';
 
-    const now = Date.now();
-
     filtered.forEach(g => {
       const card = document.createElement('div');
       card.className = 'game-card';
 
       const thumb = document.createElement('div');
       thumb.className = 'game-thumb';
-      if(g.thumbUrl) {
-        const cacheBuster = g.thumbUrl.includes('?') ? `&t=${now}` : `?t=${now}`;
-        thumb.style.backgroundImage = `url("${g.thumbUrl}${cacheBuster}")`;
-        thumb.textContent = '';
+      const thumbSrc = g.thumbUrl;
+      if(thumbSrc) {
+        thumb.style.backgroundImage = `url("${thumbSrc}")`;
       } else {
-        thumb.style.backgroundImage = '';
         thumb.textContent = g.title.slice(0, 2).toUpperCase();
+        autoThumb(g, thumb);
       }
 
       const info = document.createElement('div');
       info.className = 'game-info';
-      
+
       const title = document.createElement('div');
       title.className = 'game-title';
       title.textContent = g.title;
@@ -756,33 +1471,18 @@
       info.appendChild(tag);
 
       const actions = document.createElement('div');
-      actions.className = 'card-actions';
+      actions.className = 'card-actions dev-only';
 
-      const btnEdit = document.createElement('button');
-      btnEdit.className = 'card-btn';
-      btnEdit.title = 'Edit Title/Image/Files';
-      btnEdit.type = 'button';
-      btnEdit.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
-      btnEdit.addEventListener('click', (e) => {
+      const btnThumb = document.createElement('button');
+      btnThumb.className = 'card-btn';
+      btnThumb.title = 'Edit name / thumbnail';
+      btnThumb.type = 'button';
+      btnThumb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+      btnThumb.addEventListener('click', (e) => {
         e.stopPropagation();
-        openEditModal(g);
+        openThumbModal(g);
       });
-
-      const btnDel = document.createElement('button');
-      btnDel.className = 'card-btn';
-      btnDel.title = 'Delete Game';
-      btnDel.type = 'button';
-      btnDel.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>';
-      btnDel.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        if(confirm('Delete "' + g.title + '" permanently from server?')){
-          await fetch(`/api/games/${encodeURIComponent(g.id)}`, { method: 'DELETE' });
-          loadGames();
-        }
-      });
-
-      actions.appendChild(btnEdit);
-      actions.appendChild(btnDel);
+      actions.appendChild(btnThumb);
 
       card.appendChild(thumb);
       card.appendChild(info);
@@ -795,17 +1495,55 @@
 
   gamesSearch.addEventListener('input', () => renderGames(gamesSearch.value));
 
-  function playGame(game){
+  // The game's index.html is downloaded from the repo and shown in the player, with a <base>
+  // pointing at its folder so its scripts, images and sounds load from the repo too.
+  async function fetchGameHtml(game){
+    const res = await fetch(game.playUrl);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    let html = await res.text();
+
+    const dir = game.playUrl.slice(0, game.playUrl.lastIndexOf('/') + 1);
+    const base = `<base href="${dir}">`;
+    html = html.replace(/<base\b[^>]*>/gi, '');
+    if(/<head\b[^>]*>/i.test(html))      html = html.replace(/<head\b[^>]*>/i, m => m + base);
+    else if(/<html\b[^>]*>/i.test(html)) html = html.replace(/<html\b[^>]*>/i, m => m + '<head>' + base + '</head>');
+    else if(/<!doctype[^>]*>/i.test(html)) html = html.replace(/<!doctype[^>]*>/i, m => m + base);
+    else html = base + html;
+    return html;
+  }
+
+  let playToken = 0;
+
+  async function playGame(game){
+    const token = ++playToken;
+
     if(settings.launch === 'newtab'){
-      window.open(game.playUrl, '_blank', 'noopener');
+      const w = window.open('about:blank', '_blank');
+      try{
+        const html = await fetchGameHtml(game);
+        if(!w) throw new Error('popup blocked');
+        w.location.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+      }catch(err){
+        if(w) w.close();
+        alert('Could not open ' + game.title + ' in a new tab (allow pop-ups, or try the games panel).');
+      }
       return;
     }
+
     playerTitle.textContent = game.title;
     loadingText.textContent = `loading ${game.title}…`;
     playerLoading.classList.remove('hidden');
-
-    gameFrame.src = game.playUrl;
     gamePlayer.classList.add('open');
+
+    try{
+      const html = await fetchGameHtml(game);
+      if(token !== playToken) return;          // you went back or picked another game
+      gameFrame.srcdoc = html;
+    }catch(err){
+      if(token !== playToken) return;
+      console.error('Failed to load game:', err);
+      loadingText.textContent = `could not load ${game.title} — try again in a moment`;
+    }
   }
 
   btnPlayerFullscreen.addEventListener('click', () => {
@@ -829,7 +1567,7 @@
   });
 
   gameFrame.addEventListener('load', () => {
-    if (gameFrame.src && gameFrame.src !== 'about:blank') {
+    if (gameFrame.hasAttribute('srcdoc') || (gameFrame.src && gameFrame.src !== 'about:blank')) {
       setTimeout(() => {
         playerLoading.classList.add('hidden');
       }, 300);
@@ -841,126 +1579,374 @@
       document.exitFullscreen().catch(() => {});
     }
     gamePlayer.classList.remove('open');
+    playToken++;
+    gameFrame.removeAttribute('srcdoc');
     gameFrame.src = 'about:blank';
     playerLoading.classList.remove('hidden');
   });
 
-  document.getElementById('btnAddGame').addEventListener('click', () => addGameModal.classList.add('open'));
-  document.getElementById('btnCancelAddGame').addEventListener('click', () => addGameModal.classList.remove('open'));
-
-  document.getElementById('addGameForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const title = document.getElementById('gameTitleInput').value.trim();
-    const thumbUrl = document.getElementById('gameThumbInput').value.trim();
-    const tag = document.getElementById('gameTagInput').value.trim();
-    const folderInput = document.getElementById('gameFolderInput');
-    const fileInput = document.getElementById('gameFileInput');
-
-    const selectedFiles = folderInput.files.length > 0 ? Array.from(folderInput.files) : Array.from(fileInput.files);
-
-    if(selectedFiles.length === 0){
-      alert('Please select files or a folder to upload.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('thumbUrl', thumbUrl);
-    formData.append('tag', tag);
-
-    selectedFiles.forEach(file => {
-      formData.append('files', file);
-      formData.append('paths', file.webkitRelativePath || file.name);
-    });
-
-    const btnSave = document.getElementById('btnSaveGame');
-    btnSave.textContent = 'Uploading...';
-    btnSave.disabled = true;
-
-    try {
-      const res = await fetch('/api/games', {
-        method: 'POST',
-        body: formData
-      });
-      if(!res.ok) throw new Error('Failed to upload');
-
-      addGameModal.classList.remove('open');
-      document.getElementById('addGameForm').reset();
-      await loadGames();
-    } catch(err) {
-      alert('Failed to upload game.');
-    } finally {
-      btnSave.textContent = 'upload to server';
-      btnSave.disabled = false;
-    }
+  // "add game" now sends you to GitHub's upload page for the repo
+  document.getElementById('btnAddGame').addEventListener('click', () => {
+    window.open(UPLOAD_URL, '_blank', 'noopener');
   });
+  // ---------- DEBUG TOOLS (developer mode) ----------
+  const dbgLog = document.getElementById('dbgLog');
+  const dbgFilter = document.getElementById('dbgFilter');
+  const dbgLogNote = document.getElementById('dbgLogNote');
+  const dbgEvalInput = document.getElementById('dbgEvalInput');
+  const dbgChecks = document.getElementById('dbgChecks');
+  const dbgRunNote = document.getElementById('dbgRunNote');
+  const dbgLibSummary = document.getElementById('dbgLibSummary');
+  const dbgLibTable = document.getElementById('dbgLibTable');
+  let dbgTab = 'console';
 
-  function openEditModal(game){
-    document.getElementById('editGameId').value = game.id;
-    document.getElementById('editTitleInput').value = game.title;
-    document.getElementById('editThumbInput').value = game.thumbUrl || '';
-    document.getElementById('editTagInput').value = game.tag || '';
-    document.getElementById('editThumbFileInput').value = '';
-    document.getElementById('editFolderInput').value = '';
-    document.getElementById('editFileInput').value = '';
-    editGameModal.classList.add('open');
+  const timeStr = t => new Date(t).toTimeString().slice(0, 8);
+
+  function passesFilter(e){
+    if(e.level === 'input' || e.level === 'result') return true;
+    const f = dbgFilter.value;
+    if(f === 'error') return e.level === 'error';
+    if(f === 'warn') return e.level === 'error' || e.level === 'warn';
+    if(f === 'net') return e.level === 'net';
+    return true;
   }
 
-  document.getElementById('btnCancelEditGame').addEventListener('click', () => editGameModal.classList.remove('open'));
+  function lineEl(e){
+    const div = document.createElement('div');
+    div.className = 'dbg-line ' + e.level + (e.bad ? ' bad' : '');
+    const ts = document.createElement('span');
+    ts.className = 'ts';
+    ts.textContent = timeStr(e.t);
+    div.appendChild(ts);
+    div.appendChild(document.createTextNode(e.text));
+    return div;
+  }
 
-  document.getElementById('editGameForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('editGameId').value;
-    const title = document.getElementById('editTitleInput').value.trim();
-    const thumbUrl = document.getElementById('editThumbInput').value.trim();
-    const tag = document.getElementById('editTagInput').value.trim();
-    const thumbFile = document.getElementById('editThumbFileInput').files[0];
-    const folderInput = document.getElementById('editFolderInput');
-    const fileInput = document.getElementById('editFileInput');
+  function renderConsole(){
+    dbgLog.innerHTML = '';
+    let shown = 0;
+    debugLog.forEach(e => { if(passesFilter(e)){ dbgLog.appendChild(lineEl(e)); shown++; } });
+    dbgLogNote.textContent = shown + ' of ' + debugLog.length + ' lines';
+    dbgLog.scrollTop = dbgLog.scrollHeight;
+  }
 
-    const selectedFiles = folderInput.files.length > 0 ? Array.from(folderInput.files) : Array.from(fileInput.files);
+  debugListener = (e) => {
+    if(!debugPanel.classList.contains('open') || dbgTab !== 'console' || !passesFilter(e)) return;
+    const nearBottom = dbgLog.scrollHeight - dbgLog.scrollTop - dbgLog.clientHeight < 60;
+    dbgLog.appendChild(lineEl(e));
+    if(nearBottom) dbgLog.scrollTop = dbgLog.scrollHeight;
+  };
 
-    const formData = new FormData();
-    formData.append('id', id);
-    formData.append('title', title);
-    formData.append('thumbUrl', thumbUrl);
-    formData.append('tag', tag);
-    
-    if (thumbFile) {
-      formData.append('thumbFile', thumbFile);
-    }
-
-    selectedFiles.forEach(file => {
-      formData.append('files', file);
-      formData.append('paths', file.webkitRelativePath || file.name);
-    });
-
-    const btnSave = document.getElementById('btnSaveEditGame');
-    btnSave.textContent = 'Saving...';
-    btnSave.disabled = true;
-
-    try {
-      const res = await fetch(`/api/games/${encodeURIComponent(id)}`, {
-        method: 'PUT',
-        body: formData
-      });
-
-      if (!res.ok) {
-        alert('Failed to update game details.');
-        return;
-      }
-
-      editGameModal.classList.remove('open');
-      document.getElementById('editGameForm').reset();
-      await loadGames();
-    } catch (err) {
-      console.error('Edit error:', err);
-      alert('Error updating game.');
-    } finally {
-      btnSave.textContent = 'save changes';
-      btnSave.disabled = false;
+  dbgFilter.addEventListener('change', renderConsole);
+  document.getElementById('btnDbgClear').addEventListener('click', () => { debugLog.length = 0; renderConsole(); });
+  document.getElementById('btnDbgCopy').addEventListener('click', async () => {
+    const text = debugLog.map(e => timeStr(e.t) + ' [' + e.level + '] ' + e.text).join('\n');
+    try{
+      await navigator.clipboard.writeText(text);
+      dbgLogNote.textContent = 'copied ' + debugLog.length + ' lines';
+    }catch(err){
+      dbgLogNote.textContent = 'could not copy (browser blocked it)';
     }
   });
+
+  function fmt(v){
+    if(v === undefined) return 'undefined';
+    if(typeof v === 'string') return JSON.stringify(v);
+    if(typeof v === 'function') return String(v).slice(0, 300);
+    try{ return JSON.stringify(v, null, 2); }catch(e){ return String(v); }
+  }
+
+  // tiny javascript console: runs in the page's global scope; use `lava` to reach the app's data
+  document.getElementById('dbgEvalForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const code = dbgEvalInput.value.trim();
+    if(!code) return;
+    dbgEvalInput.value = '';
+    pushLog('input', ['> ' + code]);
+    try{
+      let out = (0, eval)(code);
+      if(out && typeof out.then === 'function') out = await out;
+      pushLog('result', [fmt(out)]);
+    }catch(err){
+      pushLog('error', [err.message]);
+    }
+  });
+
+  // ---- connectivity checks ----
+  const ghHeaders = { 'Accept': 'application/vnd.github+json' };
+  const CHECK_NAMES = [
+    'browser online', 'GitHub API + rate limit', 'repo + branch', 'file list + games',
+    'jsDelivr CDN', 'shared edits file', 'Wikipedia (auto thumbnails)', 'GitHub token',
+    'browser storage', 'password hashing'
+  ];
+
+  function buildChecks(ctx){
+    return [
+      async () => navigator.onLine
+        ? { status: 'ok', detail: 'the browser says it is online' }
+        : { status: 'bad', detail: 'the browser reports it is offline' },
+
+      async () => {
+        const r = await fetch('https://api.github.com/rate_limit', { headers: ghHeaders });
+        if(!r.ok) return { status: 'bad', detail: 'HTTP ' + r.status };
+        const j = await r.json();
+        const c = (j.resources && j.resources.core) || j.rate;
+        const left = c.remaining;
+        return {
+          status: left === 0 ? 'bad' : (left < 10 ? 'warn' : 'ok'),
+          detail: left + ' of ' + c.limit + ' requests left this hour (resets ' + new Date(c.reset * 1000).toLocaleTimeString() + ')'
+        };
+      },
+
+      async () => {
+        const r = await fetch(`${API_BASE}/commits/${GH_BRANCH}`, { headers: ghHeaders });
+        if(r.status === 404) return { status: 'bad', detail: `${GH_OWNER}/${GH_REPO} or branch "${GH_BRANCH}" not found (is the repo public?)` };
+        if(!r.ok) return { status: 'bad', detail: 'HTTP ' + r.status };
+        const j = await r.json();
+        ctx.ref = j.sha;
+        ctx.treeRef = j.commit.tree.sha;
+        return { status: 'ok', detail: `${GH_BRANCH} is at ${j.sha.slice(0, 7)}: ${String(j.commit.message).split('\n')[0].slice(0, 80)}` };
+      },
+
+      async () => {
+        if(!ctx.treeRef) return { status: 'warn', detail: 'skipped (no commit found above)' };
+        const r = await fetch(`${API_BASE}/git/trees/${ctx.treeRef}?recursive=1`, { headers: ghHeaders });
+        if(!r.ok) return { status: 'bad', detail: 'HTTP ' + r.status };
+        const j = await r.json();
+        ctx.tree = j.tree || [];
+        const files = ctx.tree.filter(t => t.type === 'blob').length;
+        const games = buildGames(ctx.tree, ctx.ref).length;
+        const notes = [];
+        if(j.truncated) notes.push('file list was truncated, some games may be missing');
+        if(games === 0) notes.push('no folder with an index.html found');
+        return { status: notes.length ? 'warn' : 'ok', detail: `${files} files, ${games} games with an index.html` + (notes.length ? ' (' + notes.join('; ') + ')' : '') };
+      },
+
+      async () => {
+        const g = activeGames[0];
+        if(!g) return { status: 'warn', detail: 'no games loaded yet, open the games tab first' };
+        const r = await fetch(g.playUrl, { method: 'HEAD' });
+        return r.ok
+          ? { status: 'ok', detail: `${g.id}/index.html reachable (HTTP ${r.status})` }
+          : { status: 'bad', detail: `${g.id}/index.html returned HTTP ${r.status}` };
+      },
+
+      async () => {
+        if(!ctx.tree) return { status: 'warn', detail: 'skipped (no file list above)' };
+        if(!ctx.tree.some(t => t.type === 'blob' && t.path === OVERRIDES_FILE)){
+          return { status: 'ok', detail: OVERRIDES_FILE + ' does not exist yet (it is created the first time you save an edit)' };
+        }
+        const r = await fetch(cdnBase(ctx.ref) + OVERRIDES_FILE);
+        if(!r.ok) return { status: 'bad', detail: 'HTTP ' + r.status };
+        const j = await r.json();
+        return { status: 'ok', detail: OVERRIDES_FILE + ' is valid, ' + Object.keys(j).length + ' game(s) edited' };
+      },
+
+      async () => {
+        const r = await fetch('https://en.wikipedia.org/w/api.php?action=query&meta=siteinfo&format=json&origin=*');
+        return r.ok ? { status: 'ok', detail: 'reachable' } : { status: 'bad', detail: 'HTTP ' + r.status };
+      },
+
+      async () => {
+        const t = getToken();
+        if(!t) return { status: 'warn', detail: 'no token set, edits only save in this browser' };
+        const r = await fetch(API_BASE, { headers: { ...ghHeaders, 'Authorization': 'Bearer ' + t } });
+        if(r.status === 401) return { status: 'bad', detail: 'token rejected or expired' };
+        if(!r.ok) return { status: 'bad', detail: 'HTTP ' + r.status };
+        const j = await r.json();
+        if(!j.permissions) return { status: 'warn', detail: 'token accepted, but could not confirm it can write' };
+        return j.permissions.push
+          ? { status: 'ok', detail: 'token is valid and can write to the repo' }
+          : { status: 'warn', detail: 'token is valid but cannot write here (needs contents: read and write on this repo)' };
+      },
+
+      async () => {
+        localStorage.setItem('lava_debug_probe', '1');
+        const ok = localStorage.getItem('lava_debug_probe') === '1';
+        localStorage.removeItem('lava_debug_probe');
+        if(!ok) return { status: 'bad', detail: 'could not read back what was written' };
+        let bytes = 0;
+        Object.keys(localStorage).filter(k => k.startsWith('lava_')).forEach(k => { bytes += k.length + (localStorage.getItem(k) || '').length; });
+        return { status: 'ok', detail: 'works, lava data uses about ' + (bytes / 1024).toFixed(1) + ' KB' };
+      },
+
+      async () => (typeof crypto !== 'undefined' && crypto.subtle)
+        ? { status: 'ok', detail: 'available' }
+        : { status: 'bad', detail: 'not available here (needs https or localhost), so the developer password will not work' }
+    ];
+  }
+
+  function renderCheckRows(){
+    dbgChecks.innerHTML = '';
+    return CHECK_NAMES.map(name => {
+      const row = document.createElement('div');
+      row.className = 'dbg-check';
+      const dot = document.createElement('span');
+      dot.className = 'dbg-dot';
+      const box = document.createElement('div');
+      const n = document.createElement('div');
+      n.className = 'dbg-check-name';
+      n.textContent = name;
+      const d = document.createElement('div');
+      d.className = 'dbg-check-detail';
+      d.textContent = 'not run yet';
+      box.appendChild(n); box.appendChild(d);
+      row.appendChild(dot); row.appendChild(box);
+      dbgChecks.appendChild(row);
+      return { dot, d };
+    });
+  }
+
+  let checksRunning = false;
+
+  async function runChecks(){
+    if(checksRunning) return [];
+    checksRunning = true;
+    const rows = renderCheckRows();
+    const ctx = {};
+    const fns = buildChecks(ctx);
+    const results = [];
+    const started = performance.now();
+    dbgRunNote.textContent = 'running…';
+    for(let i = 0; i < fns.length; i++){
+      rows[i].d.textContent = 'checking…';
+      const t = performance.now();
+      let r;
+      try{ r = await fns[i](); }
+      catch(err){ r = { status: 'bad', detail: 'failed: ' + (err.message || err) + ' (blocked, offline or a network error)' }; }
+      r.ms = Math.round(performance.now() - t);
+      rows[i].dot.className = 'dbg-dot ' + r.status;
+      rows[i].d.textContent = r.detail + '  ·  ' + r.ms + 'ms';
+      results.push({ name: CHECK_NAMES[i], ...r });
+      if(r.status !== 'ok') console.warn('[check] ' + CHECK_NAMES[i] + ': ' + r.detail);
+    }
+    const bad = results.filter(r => r.status === 'bad').length;
+    const warn = results.filter(r => r.status === 'warn').length;
+    dbgRunNote.textContent = `done in ${Math.round(performance.now() - started)}ms: ${bad} failed, ${warn} warnings`;
+    console.info('[check] finished: ' + bad + ' failed, ' + warn + ' warnings');
+    checksRunning = false;
+    return results;
+  }
+
+  document.getElementById('btnDbgRun').addEventListener('click', runChecks);
+
+  // ---- library view ----
+  function thumbSource(g){
+    if(g.thumbUrl && g.thumbUrl !== g.baseThumb) return 'edited';
+    if(g.baseThumb) return 'repo / config';
+    const a = autoThumbs[g.id];
+    if(a && a.url) return 'auto' + (a.fit === 'icon' ? ' (favicon)' : '');
+    if(a) return 'none found';
+    return 'letters';
+  }
+
+  function renderLibrary(){
+    let cachedAge = 'nothing saved';
+    try{
+      const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+      if(c) cachedAge = 'saved list is ' + Math.round((Date.now() - c.time) / 1000) + 's old (refreshes after 5 min)';
+    }catch(e){}
+    const m = activeGames[0] && activeGames[0].playUrl.match(/@([^/]+)\//);
+    dbgLibSummary.textContent = `${activeGames.length} games · version ${m ? m[1].slice(0, 7) : '?'} · ${cachedAge} · ` +
+      `${Object.keys(autoThumbs).length} auto-thumbnail lookups saved · ${Object.keys(localEdits).length} browser-only edits`;
+
+    dbgLibTable.innerHTML = '';
+    const head = document.createElement('tr');
+    ['folder', 'name', 'thumbnail', 'plays from'].forEach(t => { const th = document.createElement('th'); th.textContent = t; head.appendChild(th); });
+    dbgLibTable.appendChild(head);
+    activeGames.forEach(g => {
+      const tr = document.createElement('tr');
+      [g.id, g.title === g.baseTitle ? g.title : g.title + ' (edited)', thumbSource(g), g.playUrl].forEach(t => {
+        const td = document.createElement('td'); td.textContent = t; tr.appendChild(td);
+      });
+      dbgLibTable.appendChild(tr);
+    });
+  }
+
+  document.getElementById('btnDbgRefresh').addEventListener('click', async () => {
+    try{ localStorage.removeItem(CACHE_KEY); }catch(e){}
+    console.info('[debug] refreshing library');
+    await loadGames();
+    renderLibrary();
+  });
+  document.getElementById('btnDbgClearThumbs').addEventListener('click', () => {
+    autoThumbs = {};
+    try{ localStorage.removeItem(AUTO_KEY); }catch(e){}
+    console.info('[debug] cleared saved auto-thumbnail lookups');
+    renderGames(gamesSearch.value);
+    renderLibrary();
+  });
+  document.getElementById('btnDbgClearLocal').addEventListener('click', () => {
+    if(!confirm('Remove name/thumbnail edits saved only in this browser?')) return;
+    localEdits = {};
+    saveLocalEdits();
+    console.info('[debug] cleared browser-only edits');
+    refreshGames();
+    renderLibrary();
+  });
+  document.getElementById('btnDbgClearAll').addEventListener('click', () => {
+    if(!confirm('Clear the saved game list and thumbnail lookups? (your settings, token and edits are kept)')) return;
+    try{ localStorage.removeItem(CACHE_KEY); localStorage.removeItem(AUTO_KEY); }catch(e){}
+    autoThumbs = {};
+    console.info('[debug] cleared cached data');
+    renderLibrary();
+  });
+
+  // ---- panel + tabs ----
+  function showDbgTab(tab){
+    dbgTab = tab;
+    document.querySelectorAll('.dbg-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.getElementById('dbgViewConsole').classList.toggle('active', tab === 'console');
+    document.getElementById('dbgViewConnect').classList.toggle('active', tab === 'connect');
+    document.getElementById('dbgViewLibrary').classList.toggle('active', tab === 'library');
+    if(tab === 'console') renderConsole();
+    if(tab === 'library') renderLibrary();
+    if(tab === 'connect' && !dbgChecks.children.length) renderCheckRows();
+  }
+  document.querySelectorAll('.dbg-tab').forEach(b => b.addEventListener('click', () => showDbgTab(b.dataset.tab)));
+
+  navDebug.addEventListener('click', () => {
+    closeAllPanels();
+    debugPanel.classList.add('open');
+    setActiveNav('debug');
+    showDbgTab(dbgTab);
+  });
+  document.getElementById('btnCloseDebug').addEventListener('click', () => {
+    debugPanel.classList.remove('open');
+    setActiveNav('home');
+  });
+
+  // `lava` in the console tab (or the browser's own console) reaches the app's data
+  function debugHandle(){
+    return {
+      get games(){ return activeGames; },
+      get raw(){ return rawGames; },
+      get settings(){ return settings; },
+      get localEdits(){ return localEdits; },
+      get autoThumbs(){ return autoThumbs; },
+      get log(){ return debugLog; },
+      loadGames,
+      redraw: () => renderGames(gamesSearch.value),
+      checks: runChecks,
+      clearCache(){ localStorage.removeItem(CACHE_KEY); localStorage.removeItem(AUTO_KEY); return 'cleared'; }
+    };
+  }
+
+  function onDevModeChange(on){
+    if(on){
+      window.lava = debugHandle();
+      console.info('[debug] developer mode on. Try: lava.games, lava.checks(), lava.clearCache()');
+    } else {
+      delete window.lava;
+      if(debugPanel.classList.contains('open')){
+        closeAllPanels();
+        setActiveNav('home');
+      }
+    }
+  }
+
+  // restore developer mode for this tab session (must run after everything above is set up)
+  try{ if(sessionStorage.getItem(DEV_SESSION_KEY) === '1' && effectiveHash()) setDevMode(true); }catch(e){}
 })();
 </script>
   </body>
