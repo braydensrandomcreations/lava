@@ -2,19 +2,6 @@
 
 # lava
 
-**a free, open-source games library that runs straight from a GitHub repo**
-
-![no build step](https://img.shields.io/badge/build%20step-none-ff6b1a?style=for-the-badge)
-![no server](https://img.shields.io/badge/server-none-e2434a?style=for-the-badge)
-![one file](https://img.shields.io/badge/site-1%20html%20file-ffd23f?style=for-the-badge&labelColor=5c1616)
-![hosted on](https://img.shields.io/badge/hosted%20on-GitHub%20Pages-c81f2d?style=for-the-badge)
-
-*drop a game in a folder. it shows up on the site. that's it.*
-
-</div>
-
----
-
 ## ✨ What is this?
 
 lava is a browser games library. The whole site is a single `index.html`, so there is nothing to install, build, or host besides GitHub Pages. It reads this repo's folders, turns every game it finds into a card, and plays it right inside the page.
