@@ -1,21 +1,12 @@
 {
-  "name": "html-project",
+  "name": "foilpack",
   "version": "1.0.0",
-  "description": "",
-  "main": "games.js",
+  "description": "Wrap any web page in a single SVG file. Runs in your browser, nothing uploaded.",
+  "private": true,
+  "license": "MIT",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "npx --yes serve . -l 3000",
+    "check": "node --check app.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "express-fileupload": "^1.5.2",
-    "fs-extra": "^11.4.0",
-    "multer": "^2.3.0"
-  }
+  "keywords": ["html", "svg", "converter", "single-file", "bundler", "client-side"]
 }

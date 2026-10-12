@@ -1,6 +1,15 @@
-node_modules/
-.env
-dist/
-build/
+# OS
 .DS_Store
-*.log
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Node (if you add tooling)
+node_modules/
+npm-debug.log*
+
+# Local test output
+*.local.svg
