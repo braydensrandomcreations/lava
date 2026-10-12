@@ -6,6 +6,10 @@
 
 <p align="center">Wrap any web page in a single SVG file. Runs in your browser, nothing uploaded.</p>
 
+<p align="center">
+  <img src="assets/social-preview.png" alt="FoilPack: wrap any web page in a single SVG file" width="720">
+</p>
+
 FoilPack turns an HTML page into one self-contained `.svg` file that still works: same layout, same code, same behavior. Drop in your page along with the CSS, scripts, images, and fonts it uses, and they all get packed inside.
 
 ## Features
